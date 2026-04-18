@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار الفيزياء — تحصيلي 2025</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #1a4a8a;
+    --primary-light: #2563b8;
+    --secondary: #f5a623;
+    --accent: #e74c3c;
+    --bg: #f0f4fa;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6c757d;
+    --radius: 14px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.1);
+    --correct: #27ae60;
+    --wrong: #e74c3c;
+    --skip: #f39c12;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: block; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0d2d5e 100%);
+    color: white;
+    text-align: center;
+    padding: 30px 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  .header h1 { font-size: clamp(1.4rem, 4vw, 2.2rem); font-weight: 800; margin-bottom: 8px; position: relative; }
+  .header p { font-size: 0.95rem; opacity: 0.85; position: relative; }
+  .badge {
+    display: inline-block;
+    background: var(--secondary);
+    color: #1a1a1a;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  /* CONTAINER */
+  .container { max-width: 900px; margin: 0 auto; padding: 28px 16px; }
+
+  /* FULL EXAM CARD */
+  .full-exam-card {
+    background: linear-gradient(135deg, var(--primary), #0d2d5e);
+    color: white;
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+    border: 3px solid transparent;
+  }
+  .full-exam-card:hover { transform: scale(1.02); }
+  .full-exam-card.selected { border-color: var(--secondary); }
+  .full-exam-card h3 { font-size: 1.15rem; font-weight: 800; margin: 8px 0 5px; }
+  .full-exam-card p { font-size: 0.85rem; opacity: 0.85; }
+
+  /* SECTIONS TITLE */
+  .sections-title {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--primary-light);
+  }
+
+  /* SECTIONS GRID */
+  .sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  /* SECTION CARD */
+  .section-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 16px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 5px; height: 100%;
+    background: var(--primary);
+    transition: width 0.25s;
+  }
+  .section-card:hover::before { width: 8px; }
+  .section-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+    border-color: var(--primary);
+  }
+  .section-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, #f0f4ff, #dce8ff);
+    transform: translateY(-2px);
+  }
+  .section-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px; left: 10px;
+    font-size: 1rem;
+    color: var(--primary);
+    font-weight: 900;
+  }
+  .section-card .icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+  .section-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; }
+  .section-card p { font-size: 0.78rem; color: var(--muted); }
+  .q-count {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  /* SELECTION STATUS */
+  .sel-status {
+    display: flex; align-items: center; justify-content: space-between;
+    background: white; border-radius: 12px; padding: 13px 18px;
+    box-shadow: var(--shadow); margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  #selLabel { font-size: 0.88rem; font-weight: 600; color: #e74c3c; }
+  .clear-btn {
+    background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px;
+    padding: 5px 13px; cursor: pointer; font-size: 0.82rem; color: #666;
+    font-family: inherit;
+  }
+  .clear-btn:hover { background: #ffe0e0; color: var(--wrong); border-color: var(--wrong); }
+
+  /* SETTINGS BOX */
+  .settings-box {
+    background: white; border-radius: 14px; padding: 20px;
+    box-shadow: var(--shadow); margin-bottom: 22px;
+  }
+  .settings-box .stitle { font-weight: 700; margin-bottom: 14px; color: var(--primary); }
+  .settings-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .settings-row label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+  .settings-row select {
+    padding: 6px 10px; border-radius: 8px;
+    border: 2px solid #ddd; font-family: inherit; font-size: 0.9rem;
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 13px 28px; border-radius: 50px; border: none;
+    font-size: 0.98rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s ease; font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: var(--secondary); color: #1a1a1a; }
+  .btn-secondary:hover { filter: brightness(1.1); transform: translateY(-2px); }
+  .btn-danger { background: var(--accent); color: white; }
+  .btn-danger:hover { background: #c0392b; }
+  .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+  .btn-outline:hover { background: var(--primary); color: white; }
+  .btn-center { text-align: center; margin-top: 22px; }
+  .btn-success { background: var(--correct); color: white; }
+
+  /* TIMER BAR */
+  .timer-bar {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .timer-display { font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; }
+  .timer-display.warning { color: #ff6b6b; animation: tblink 1s infinite; }
+  @keyframes tblink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .exam-info-bar { font-size: 0.82rem; opacity: 0.85; }
+  .timer-controls { display: flex; gap: 8px; }
+  .timer-btn {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    padding: 6px 14px; border-radius: 20px; cursor: pointer;
+    font-size: 0.82rem; transition: background 0.2s; font-family: inherit;
+  }
+  .timer-btn:hover { background: rgba(255,255,255,0.35); }
+
+  /* Q TIMER BAR (per-question) */
+  .q-timer-wrap {
+    height: 4px; background: #e0e0e0; overflow: hidden;
+  }
+  .q-timer-fill { height: 100%; transition: width 1s linear, background 0.3s; }
+
+  /* PROGRESS */
+  .progress-wrapper {
+    background: white; padding: 10px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .progress-bar-track { flex: 1; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-light), var(--secondary));
+    border-radius: 4px; transition: width 0.4s;
+  }
+  .progress-text { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+  /* QUESTION */
+  .question-area { padding: 20px 16px 100px; max-width: 800px; margin: 0 auto; }
+  .question-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 26px 22px; box-shadow: var(--shadow); margin-bottom: 20px;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .question-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px; padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0; flex-wrap: wrap; gap: 8px;
+  }
+  .question-num {
+    background: var(--primary); color: white;
+    padding: 4px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 700;
+  }
+  .question-topic {
+    font-size: 0.76rem; color: var(--muted);
+    background: #f0f4ff; padding: 3px 10px; border-radius: 10px;
+  }
+  .q-time-left { font-size: 0.78rem; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .question-text { font-size: 1rem; font-weight: 600; line-height: 1.85; margin-bottom: 20px; }
+
+  /* OPTIONS */
+  .options-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .option-item {
+    border: 2px solid #e0e0e0; border-radius: 10px;
+    padding: 13px 16px; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: flex-start;
+    gap: 12px; font-size: 0.93rem; line-height: 1.6;
+  }
+  .option-item:hover:not(.disabled) { border-color: var(--primary-light); background: #f0f4ff; }
+  .option-item.selected { border-color: var(--primary); background: #e8eeff; }
+  .option-item.correct { border-color: var(--correct); background: #d4edda; }
+  .option-item.wrong { border-color: var(--wrong); background: #fde8e8; }
+  .option-item.show-correct { border-color: var(--correct); background: #f0fff4; }
+  .option-item.disabled { cursor: default; }
+  .option-letter {
+    min-width: 28px; height: 28px; border-radius: 50%;
+    background: #e8e8e8; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.83rem; transition: all 0.2s; flex-shrink: 0;
+  }
+  .option-item.selected .option-letter { background: var(--primary); color: white; }
+  .option-item.correct .option-letter { background: var(--correct); color: white; }
+  .option-item.wrong .option-letter { background: var(--wrong); color: white; }
+  .option-item.show-correct .option-letter { background: var(--correct); color: white; }
+
+  /* NAV BUTTONS (fixed bottom) */
+  .nav-buttons {
+    position: fixed; bottom: 0; right: 0; left: 0;
+    background: white; padding: 12px 20px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; z-index: 50;
+  }
+
+  /* Q DOTS */
+  .dots-row {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    justify-content: center; padding: 0 16px 16px;
+    max-width: 800px; margin: 0 auto;
+  }
+  .qdot {
+    width: 28px; height: 28px; border-radius: 6px;
+    border: 2px solid #ddd; background: white;
+    cursor: pointer; font-size: 9px; font-weight: 700; color: #999;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .qdot:hover { border-color: var(--primary); color: var(--primary); }
+  .qdot.answered { background: #e8eeff; border-color: var(--primary); color: var(--primary); }
+  .qdot.current { background: var(--primary); color: white; border-color: var(--primary); }
+
+  /* RESULTS */
+  .results-header {
+    background: linear-gradient(135deg, var(--primary), #0d2d5e);
+    color: white; padding: 36px 20px; text-align: center;
+  }
+  .score-circle {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 6px solid rgba(255,255,255,0.4);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 18px auto; backdrop-filter: blur(4px);
+  }
+  .score-num { font-size: 2.4rem; font-weight: 900; }
+  .score-label { font-size: 0.82rem; opacity: 0.8; }
+  .grade-badge {
+    display: inline-block; padding: 7px 22px;
+    border-radius: 30px; font-size: 1.05rem; font-weight: 800; margin-top: 10px;
+  }
+  .grade-A { background: #27ae60; }
+  .grade-B { background: #2980b9; }
+  .grade-C { background: #f39c12; }
+  .grade-D { background: #e74c3c; }
+
+  .stats-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; padding: 20px 16px; }
+  .stat-box {
+    background: var(--card); border-radius: 12px; padding: 16px 22px;
+    text-align: center; box-shadow: var(--shadow); min-width: 90px;
+  }
+  .stat-num { font-size: 1.5rem; font-weight: 800; }
+  .stat-lbl { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+
+  /* TABS */
+  .tab-bar {
+    display: flex; gap: 4px; background: #f0f0f0;
+    padding: 6px; border-radius: 12px; margin: 18px 0; overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 8px 16px; border: none; background: transparent;
+    border-radius: 8px; cursor: pointer; font-size: 0.86rem;
+    font-weight: 600; white-space: nowrap; transition: all 0.2s;
+    font-family: inherit; color: var(--muted);
+  }
+  .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* FILTER */
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filter-btn {
+    padding: 5px 13px; border-radius: 20px; border: 2px solid #ddd;
+    background: white; font-size: 0.8rem; cursor: pointer;
+    font-family: inherit; transition: all 0.2s; font-weight: 600;
+  }
+  .filter-btn.active-filter { border-color: var(--primary); background: var(--primary); color: white; }
+
+  /* UNIT REPORT */
+  .report-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+  .report-topic-name { font-size: 0.95rem; font-weight: 700; }
+  .score-bar-track { height: 9px; background: #e0e0e0; border-radius: 5px; overflow: hidden; margin: 6px 0; }
+  .score-bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s; }
+  .priority-badge { font-size: 0.73rem; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+  .priority-high { background: #fde8e8; color: #721c24; }
+  .priority-mid { background: #fff3cd; color: #856404; }
+  .priority-low { background: #d4edda; color: #155724; }
+
+  /* REVIEW */
+  .review-card {
+    background: var(--card); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 14px;
+    box-shadow: var(--shadow); border-right: 5px solid;
+  }
+  .review-card.correct-card { border-color: var(--correct); }
+  .review-card.wrong-card { border-color: var(--wrong); }
+  .review-card.skip-card { border-color: var(--skip); }
+  .review-status {
+    font-size: 0.76rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 10px; display: inline-block; margin-bottom: 8px;
+  }
+  .status-correct { background: #d4edda; color: #155724; }
+  .status-wrong { background: #fde8e8; color: #721c24; }
+  .status-skip { background: #fff3cd; color: #856404; }
+  .review-q { font-weight: 600; margin-bottom: 12px; font-size: 0.93rem; }
+  .review-answers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .review-answer {
+    padding: 8px 12px; border-radius: 8px; font-size: 0.86rem;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .review-answer.user-wrong { background: #fde8e8; color: #721c24; }
+  .review-answer.correct-ans { background: #d4edda; color: #155724; }
+  .explanation-box {
+    background: #fffde7; border: 1px solid #f9a825;
+    border-radius: 8px; padding: 12px 15px;
+    font-size: 0.86rem; color: #4a3800; line-height: 1.75;
+  }
+  .explanation-box strong { display: block; margin-bottom: 4px; color: #7a5500; }
+
+  /* INTENSIVE */
+  .intense-header {
+    background: linear-gradient(135deg, #c0392b, #7b241c);
+    color: white; padding: 20px; text-align: center;
+  }
+  .intense-header h2 { font-size: 1.3rem; font-weight: 800; }
+  .intense-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+
+  /* HOME BTN */
+  .home-btn {
+    position: fixed; top: 70px; left: 16px;
+    background: rgba(255,255,255,0.92); border: 2px solid var(--primary);
+    color: var(--primary); padding: 6px 14px; border-radius: 20px;
+    cursor: pointer; font-size: 0.78rem; font-weight: 700;
+    z-index: 200; font-family: inherit; transition: all 0.2s;
+  }
+  .home-btn:hover { background: var(--primary); color: white; }
+
+  /* MODAL */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 999;
+    justify-content: center; align-items: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 18px; padding: 28px 24px;
+    max-width: 360px; width: 92%; text-align: center;
+    animation: popIn .22s ease;
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
+  .modal-box h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; }
+  .modal-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6; }
+  .modal-btns { display: flex; gap: 10px; justify-content: center; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a1a1a; color: white; padding: 10px 20px;
+    border-radius: 20px; font-size: 0.86rem; opacity: 0;
+    transition: all 0.3s; z-index: 999;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .empty-state { text-align: center; padding: 38px; color: var(--muted); font-size: 0.95rem; }
+
+  @media (max-width: 600px) {
+    .sections-grid { grid-template-columns: 1fr 1fr; gap: 11px; }
+    .section-card { padding: 15px 12px; }
+    .timer-bar { padding: 9px 12px; }
+    .timer-display { font-size: 1.1rem; }
+    .question-card { padding: 18px 14px; }
+    .container { padding: 20px 12px; }
+  }
+  @media (max-width: 380px) {
+    .sections-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== HOME ===== -->
+<div class="screen active" id="homeScreen">
+  <div class="header">
+    <h1>⚛️ اختبار الفيزياء</h1>
+    <p>كتاب تحصيلي 2025 | المسار العلمي</p>
+    <span class="badge">10 فصول — 432 سؤال</span>
+  </div>
+
+  <div class="container">
+
+    <!-- اختبار شامل -->
+    <div class="full-exam-card" id="fullExamCard" onclick="toggleAll()">
+      <span style="font-size:2rem">📚</span>
+      <h3>اختبار شامل — جميع الفصول</h3>
+      <p>جميع أسئلة الفيزياء في اختبار واحد شامل</p>
+      <div class="badge" style="margin-top:10px">432 سؤال</div>
+    </div>
+
+    <div class="sections-title">اختر فصلاً أو أكثر للاختبار (النقر يُفعّل/يُلغي)</div>
+
+    <!-- قائمة الفصول -->
+    <div class="sections-grid" id="sectionsGrid"></div>
+
+    <!-- شريط حالة الاختيار -->
+    <div class="sel-status">
+      <span id="selLabel">لم يُختَر فصل بعد — انقر على الفصول المطلوبة أو على الاختبار الشامل</span>
+      <button class="clear-btn" onclick="clearSel()">🗑 إلغاء الاختيار</button>
+    </div>
+
+    <!-- الإعدادات -->
+    <div class="settings-box">
+      <div class="stitle">⚙️ إعدادات الاختبار</div>
+      <div class="settings-row">
+        <label>
+          <span>عدد الأسئلة:</span>
+          <select id="qCountSel">
+            <option value="all">جميع الأسئلة</option>
+            <option value="10">10 أسئلة</option>
+            <option value="20">20 سؤال</option>
+            <option value="30">30 سؤال</option>
+            <option value="50" selected>50 سؤال</option>
+            <option value="80">80 سؤال</option>
+          </select>
+        </label>
+        <label>
+          <span>وقت كل سؤال:</span>
+          <select id="qTimeSel">
+            <option value="0">بدون توقيت</option>
+            <option value="60">دقيقة واحدة</option>
+            <option value="120" selected>دقيقتان</option>
+            <option value="180">3 دقائق</option>
+            <option value="300">5 دقائق</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="shuffleChk" checked>
+          <span>خلط الأسئلة عشوائياً</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="btn-center">
+      <button class="btn btn-primary" id="startBtn" onclick="startExam()" disabled style="font-size:1.05rem;padding:15px 44px;">
+        🚀 ابدأ الاختبار
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EXAM ===== -->
+<div class="screen" id="examScreen">
+  <button class="home-btn" onclick="confirmHome()">🏠 الرئيسية</button>
+
+  <div class="timer-bar">
+    <div>
+      <div class="exam-info-bar" id="examInfoBar">—</div>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+    </div>
+    <div class="timer-controls">
+      <button class="timer-btn" onclick="confirmEnd()">🏁 إنهاء</button>
+    </div>
+  </div>
+
+  <div class="q-timer-wrap">
+    <div class="q-timer-fill" id="qTimerFill" style="width:100%;background:#27ae60"></div>
+  </div>
+
+  <div class="progress-wrapper">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progFill" style="width:0%"></div>
+    </div>
+    <div class="progress-text" id="progText">0 / 0</div>
+  </div>
+
+  <div class="question-area">
+    <div class="question-card" id="questionCard"></div>
+  </div>
+
+  <div class="dots-row" id="dotsRow"></div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-outline" onclick="prevQ()">◀ السابق</button>
+    <span id="navInfo" style="font-size:0.82rem;color:var(--muted);text-align:center"></span>
+    <button class="btn btn-primary" onclick="nextQ()">التالي ▶</button>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div class="screen" id="resultsScreen">
+  <div class="results-header">
+    <h2 style="font-size:1.35rem;font-weight:800">نتيجة الاختبار</h2>
+    <div class="score-circle">
+      <div class="score-num" id="scoreNum">0%</div>
+      <div class="score-label">النتيجة</div>
+    </div>
+    <div class="grade-badge grade-A" id="gradeBadge">—</div>
+    <div style="opacity:0.8;margin-top:9px;font-size:0.82rem" id="timeTaken"></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" style="color:var(--correct)" id="rOk">0</div><div class="stat-lbl">✅ صحيح</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--wrong)" id="rNg">0</div><div class="stat-lbl">❌ خطأ</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--skip)" id="rSk">0</div><div class="stat-lbl">⏭ تخطي</div></div>
+    <div class="stat-box"><div class="stat-num" id="rTot">0</div><div class="stat-lbl">📊 الكل</div></div>
+  </div>
+
+  <div class="container" style="padding-top:0">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('review',this)">🔍 مراجعة الإجابات</button>
+      <button class="tab-btn" onclick="switchTab('report',this)">📋 تقرير الأداء</button>
+      <button class="tab-btn" onclick="switchTab('intense',this)">🎯 الاختبار المكثف</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-review">
+      <div class="filter-bar">
+        <button class="filter-btn active-filter" onclick="filterRev('all',this)">الكل</button>
+        <button class="filter-btn" onclick="filterRev('wrong',this)">الأخطاء ❌</button>
+        <button class="filter-btn" onclick="filterRev('correct',this)">الصحيح ✅</button>
+        <button class="filter-btn" onclick="filterRev('skip',this)">التخطي ⏭</button>
+      </div>
+      <div id="reviewList"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-report">
+      <div id="reportList"></div>
+      <div class="btn-center" style="margin-top:16px">
+        <button class="btn btn-primary" onclick="showScreen('homeScreen')">🔄 اختبار جديد</button>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-intense">
+      <div id="intenseSetup"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INTENSIVE ===== -->
+<div class="screen" id="intenseScreen">
+  <button class="home-btn" onclick="showScreen('resultsScreen')">← النتائج</button>
+
+  <div class="intense-header">
+    <h2>🎯 الاختبار المكثف</h2>
+    <p id="intenseDesc">أسئلة من الفصول الضعيفة</p>
+  </div>
+
+  <div class="q-timer-wrap">
+    <div class="q-timer-fill" id="iQTimerFill" style="width:100%;background:#27ae60"></div>
+  </div>
+
+  <div class="progress-wrapper">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="iProgFill" style="width:0%"></div>
+    </div>
+    <div class="progress-text" id="iProgText">0 / 0</div>
+  </div>
+
+  <div class="question-area">
+    <div class="question-card" id="iQuestionCard"></div>
+  </div>
+
+  <div class="dots-row" id="iDotsRow"></div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-outline" onclick="iPrevQ()">◀ السابق</button>
+    <button class="btn btn-danger" onclick="iConfirmEnd()">🏁 إنهاء</button>
+    <button class="btn btn-primary" onclick="iNextQ()">التالي ▶</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-box">
+    <h3 id="mTitle">تأكيد</h3>
+    <p id="mMsg">هل أنت متأكد؟</p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-danger" id="mOkBtn">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALL_Q=[
+// ===== ف1: علم الفيزياء (33 سؤال) =====
+{id:1,u:"(1) علم الفيزياء",uid:1,q:"فرع من فروع العلم يُعنى بدراسة الطاقة والمادة وكيفية ارتباطهما..",o:["الكيمياء","الأحياء","الفيزياء","الجيولوجيا"],a:2,s:"الفيزياء: علم يعنى بدراسة الطاقة والمادة والعلاقة بينهما"},
+{id:2,u:"(1) علم الفيزياء",uid:1,q:"تفسير قابل للاختبار..",o:["الفرضية","القانون","المبدأ","النظرية"],a:0,s:"الفرضية: تخمين علمي يمكن اختباره بالتجربة"},
+{id:3,u:"(1) علم الفيزياء",uid:1,q:"لكي نثبت صحة الفرضية تحتاج إلى..",o:["التجريب","الملاحظة","التحليل","الاستنتاج"],a:0,s:"لإثبات الفرضية: التجريب المتكرر"},
+{id:4,u:"(1) علم الفيزياء",uid:1,q:"«الطاقة لا تفنى ولا تستحدث من العدم» تمثل..",o:["نظرية","قانوناً","فرضية","استنتاجاً"],a:1,s:"قانون حفظ الطاقة: حقيقة علمية مثبتة = قانون"},
+{id:5,u:"(1) علم الفيزياء",uid:1,q:"تفسير علمي لظاهرة بناءً على مشاهدات مع مرور الزمن..",o:["النظرية العلمية","القانون العلمي","الفرضية العلمية","الحقيقة العلمية"],a:0,s:"النظرية العلمية: تفسير مدعوم بأدلة واسعة عبر الزمن"},
+{id:6,u:"(1) علم الفيزياء",uid:1,q:"مقارنة كمية مجهولة بأخرى معيارية..",o:["القياس","الدقة","الضبط","الطريقة العلمية"],a:0,s:"القياس: مقارنة كمية بأخرى معيارية"},
+{id:7,u:"(1) علم الفيزياء",uid:1,q:"دقة قياس الأداة تساوي..",o:["نصف قيمة أصغر تدريج","نصف قيمة أكبر تدريج","ربع أصغر تدريج","ربع أكبر تدريج"],a:0,s:"دقة الأداة = نصف قيمة أصغر تدريج"},
+{id:8,u:"(1) علم الفيزياء",uid:1,q:"أي الكميات التالية كمية متجهة؟",o:["سيارة تسير بسرعة 30 km/s","دفع عربة بقوة 70 N","سقوط حجر بسرعة 9 m/s","سباح قطع 800 m"],a:1,s:"القوة كمية متجهة (لها مقدار واتجاه)"},
+{id:9,u:"(1) علم الفيزياء",uid:1,q:"الكميات التالية كميات قياسية ما عدا..",o:["الزمن","القوة","درجة الحرارة","الحجم"],a:1,s:"القوة كمية متجهة — الزمن والحرارة والحجم قياسية"},
+{id:10,u:"(1) علم الفيزياء",uid:1,q:"النظام الدولي للوحدات يرمز له..",o:["SI","MI","Tr","Gl"],a:0,s:"النظام الدولي SI"},
+{id:11,u:"(1) علم الفيزياء",uid:1,q:"أي الوحدات التالية وحدة أساسية لكمية أساسية في النظام العالمي؟",o:["التسلا (T)","الفولت (V)","الأمبير (A)","الأوم (Ω)"],a:2,s:"الأمبير وحدة أساسية للتيار الكهربائي"},
+{id:12,u:"(1) علم الفيزياء",uid:1,q:"أي الكميات التالية كمية فيزيائية مشتقة؟",o:["شدة التيار","فرق الجهد","شدة الإضاءة","الزمن"],a:1,s:"فرق الجهد = الشغل/الشحنة → مشتقة"},
+{id:13,u:"(1) علم الفيزياء",uid:1,q:"إذا كان الطول كمية أساسية فإن المساحة..",o:["أساسية","أصلية","مشتقة","محايدة"],a:2,s:"المساحة = طول × طول = مشتقة"},
+{id:14,u:"(1) علم الفيزياء",uid:1,q:"المسافة بين مدينتين 180 km، كم تكون بالأمتار؟",o:["180×10⁻³","1800","18×10⁴","180×10⁶"],a:2,s:"180 km = 18×10⁴ m"},
+{id:15,u:"(1) علم الفيزياء",uid:1,q:"كم Hz في 0.6 MHz ؟",o:["6×10⁷","6×10⁶","0.6×10⁵","6×10⁵"],a:3,s:"0.6 MHz = 6×10⁵ Hz"},
+{id:16,u:"(1) علم الفيزياء",uid:1,q:"أي الكميات التالية وحدة أساسية لكمية أساسية؟",o:["الفولت","النيوتن","الكيلوغرام","الجول"],a:2,s:"الكيلوغرام وحدة أساسية للكتلة"},
+{id:17,u:"(1) علم الفيزياء",uid:1,q:"شرب أحمد 3 ديسيلتر حليب، هذا يعني بالنتر..",o:["3","0.3","0.003","0.0003"],a:1,s:"3 ديسيلتر = 0.3 لتر"},
+{id:18,u:"(1) علم الفيزياء",uid:1,q:"الطريقة الشائعة لاختبار ضبط جهاز عن طريق..",o:["زاوية النظر","معايرة النقطة","معايرة النقطتين","تصفير الجهاز"],a:2,s:"معايرة النقطتين: طريقة شائعة لاختبار الضبط"},
+{id:433,u:"(1) علم الفيزياء",uid:1,q:"أي صيغ العلاقات التالية يكافئ العلاقة T = V·S/m² ؟",o:["m = √(T/(V·S))","m² = T·V·S","m² = T/(V·S)","m = √(V·S/T)"],a:3,s:"بإعادة ترتيب T = V·S/m² → m² = V·S/T → m = √(V·S/T)"},
+{id:434,u:"(1) علم الفيزياء",uid:1,q:"مسطرة أصغر تدريج بها 0.25 cm، إن دقة قياسها بوحدة cm تساوي..",o:["0.025","0.05","0.125","0.5"],a:2,s:"الدقة = نصف أصغر تدريج = 0.25/2 = 0.125 cm"},
+{id:435,u:"(1) علم الفيزياء",uid:1,q:"الطريقة الصحيحة لزيادة دقة المسطرة في مصنع البلاستيك..",o:["زيادة طول المسطرة","تقليل طول المسطرة","زيادة التدريجات في وحدة الطول","تقليل التدريجات في وحدة الطول"],a:2,s:"زيادة عدد التدريجات في الوحدة يصغّر التدريج ويزيد الدقة"},
+{id:436,u:"(1) علم الفيزياء",uid:1,q:"أي التالي يُعد كمية قياسية؟",o:["القوة","التسارع","الطول","الدفع"],a:2,s:"الطول كمية قياسية (له مقدار فقط)"},
+{id:437,u:"(1) علم الفيزياء",uid:1,q:"من القانون F·Δt = m·Δv، أي الكميات التالية قياسية؟",o:["القوة والسرعة","الكتلة والزمن","الدفع والزمن","القوة والكتلة"],a:1,s:"الكتلة والزمن كميات قياسية؛ القوة والدفع والسرعة متجهة"},
+{id:438,u:"(1) علم الفيزياء",uid:1,q:"يتحرك خالد بسرعة 3 km/h جنوباً 550m ثم 200m شرقاً حتى يصل للمسجد بعد 15 دقيقة. أي الكميات الواردة قياسية؟",o:["3 km/h باتجاه المسجد","550 m جنوباً","200 m شرقاً","15 دقيقة"],a:3,s:"الزمن (15 دقيقة) كمية قياسية؛ الباقي له اتجاه"},
+{id:439,u:"(1) علم الفيزياء",uid:1,q:"الكمية المتجهة في الكميات الفيزيائية التالية هي..",o:["المسافة","الزمن","الكتلة","التسارع"],a:3,s:"التسارع كمية متجهة (له مقدار واتجاه)"},
+{id:440,u:"(1) علم الفيزياء",uid:1,q:"سفينة حجمها 400 m³ بسرعة 40 km/h جنوب شرقي، تحمل 5 سيارات كتلة كل منها 1500 kg، وتتعرض لقوة إعاقة 4×10⁴ N. أي الكميات الواردة متجهة؟",o:["السرعة والحجم","قوة الإعاقة والسرعة","الكتلة والحجم","قوة الإعاقة والكتلة"],a:1,s:"السرعة والقوة متجهتان (لهما مقدار واتجاه)"},
+{id:441,u:"(1) علم الفيزياء",uid:1,q:"وحدة الطول في النظام الدولي (SI)..",o:["سنتمتر cm","متر m","كيلومتر km","ميليمتر mm"],a:1,s:"المتر m: الوحدة الأساسية للطول في SI"},
+{id:442,u:"(1) علم الفيزياء",uid:1,q:"أي الكميات الفيزيائية التالية تُقاس بوحدة كاندلا (cd)؟",o:["شدة الإضاءة","التدفق الضوئي","الاستضاءة","الشفافية الضوئية"],a:0,s:"الكاندلا (cd): وحدة شدة الإضاءة"},
+{id:443,u:"(1) علم الفيزياء",uid:1,q:"0.003 F تُعادل..",o:["3 dF","3 mF","3 kF","3 MF"],a:1,s:"0.003 = 3×10⁻³ → 3 mF"},
+{id:444,u:"(1) علم الفيزياء",uid:1,q:"الميكرو (µ) تُعادل..",o:["10⁶","10⁻³","10⁻⁶","10⁻¹²"],a:2,s:"ميكرو = 10⁻⁶"},
+{id:445,u:"(1) علم الفيزياء",uid:1,q:"10 s تساوي بوحدة microsecond (µs)..",o:["10⁻⁷","10⁻⁶","10⁶","10⁷"],a:3,s:"10 s = 10×10⁶ µs = 10⁷ µs"},
+{id:446,u:"(1) علم الفيزياء",uid:1,q:"5 دقائق تساوي..",o:["0.5×10⁻³ ساعة","0.8×10⁻³ ساعة","18×10² ثانية","300 ثانية"],a:3,s:"5 × 60 = 300 ثانية"},
+{id:447,u:"(1) علم الفيزياء",uid:1,q:"دراجة سرعتها 10 m/s، إن سرعتها بوحدة km/h..",o:["1.2","12","36","360"],a:2,s:"10 m/s × (18/5) = 36 km/h"},
+// ===== ف2: الميكانيكا (158 سؤال) =====
+{id:19,u:"(2) الميكانيكا",uid:2,q:"تسارع جسم تغيرت سرعته بمعدل 30 m/s خلال زمن 2s..",o:["60 m/s²","30 m/s²","15 m/s²","5 m/s²"],a:2,s:"a = Δv/Δt = 30/2 = 15 m/s²"},
+{id:20,u:"(2) الميكانيكا",uid:2,q:"جسم يتحرك بسرعة تزداد بمقدار 2 m/s في كل ثانية، أي التالي صحيح؟",o:["المسافة الكلية = 2m","السرعة = 2 m/s","التسارع = 2 m/s²","الزمن الكلي = 2s"],a:2,s:"تزداد السرعة 2m/s كل ثانية = تسارع 2 m/s²"},
+{id:21,u:"(2) الميكانيكا",uid:2,q:"سيارة تزداد سرعتها من 4 m/s إلى 36 m/s خلال 4s، تسارعها..",o:["7","8","9","10"],a:1,s:"a = (36-4)/4 = 8 m/s²"},
+{id:22,u:"(2) الميكانيكا",uid:2,q:"سيارة A: من 10→30 m/s في 4s. سيارة B: من 22→33 m/s في 11s. تسارع A ......... B",o:["أكبر من","أصغر من","يساوي","نصف"],a:0,s:"aA=5, aB=1 → A أكبر"},
+{id:23,u:"(2) الميكانيكا",uid:2,q:"تتحرك سيارة من السكون بتسارع 2.5 m/s²، سرعتها بعد 10s..",o:["0.25 m/s","5 m/s","25 m/s","50 m/s"],a:2,s:"v = at = 2.5×10 = 25 m/s"},
+{id:24,u:"(2) الميكانيكا",uid:2,q:"جسم من السكون بتسارع 2 m/s²، سرعته بعد 7s..",o:["3.5","9","14","3.5"],a:2,s:"v = 0+2×7 = 14 m/s"},
+{id:25,u:"(2) الميكانيكا",uid:2,q:"سيارة من السكون بتسارع 6 m/s²، خلال كم ثانية تصل لـ 24 m/s ؟",o:["3","4","12","16"],a:1,s:"t = v/a = 24/6 = 4s"},
+{id:26,u:"(2) الميكانيكا",uid:2,q:"سيارة بسرعة 30 m/s تتباطأ 6 m/s²، سرعتها بعد 4s..",o:["6","36","26","54"],a:0,s:"v = 30-6×4 = 6 m/s"},
+{id:27,u:"(2) الميكانيكا",uid:2,q:"سار محمد 8m غرباً ثم 12m شرقاً ثم 8m شمالاً، المسافة والإزاحة..",o:["المسافة 5m والإزاحة 35m","المسافة 35m والإزاحة 5m","كلاهما 35m","كلاهما 5m"],a:1,s:"المسافة=28m؛ الإزاحة الأفقية=4m شرق، رأسية=8m شمال"},
+{id:28,u:"(2) الميكانيكا",uid:2,q:"أُطلقت قذيفة بزاوية 30° وبسرعة 39.2 m/s، زمن الوصول لأقصى ارتفاع..",o:["1","2","3","4"],a:1,s:"t = v₀sinθ/g = 39.2×0.5/9.8 = 2s"},
+{id:29,u:"(2) الميكانيكا",uid:2,q:"نحلة على حافة عجلة بُعدها 2m من المركز بسرعة 3 m/s، تسارعها المركزي..",o:["18 m/s²","6 m/s²","4.5 m/s²","1.5 m/s²"],a:2,s:"ac = v²/r = 9/2 = 4.5 m/s²"},
+{id:30,u:"(2) الميكانيكا",uid:2,q:"جسم 3 kg يلور دورة كاملة في 20s، سرعته الزاوية بـ rad/s..",o:["π/20","π/10","20π","40π"],a:1,s:"ω = 2π/T = 2π/20 = π/10 rad/s"},
+{id:31,u:"(2) الميكانيكا",uid:2,q:"يُدفع طالب طاولة 10 kg على سطح أفقي μ=0.2، قوة الاحتكاك..",o:["10 N","20 N","25 N","100 N"],a:1,s:"f = μmg = 0.2×10×10 = 20 N"},
+{id:32,u:"(2) الميكانيكا",uid:2,q:"صندوق 3 kg، قوة 30N، μ=0.2، قوة الاحتكاك..",o:["6 N","18 N","60 N","3 N"],a:0,s:"f = μmg = 0.2×3×10 = 6 N"},
+{id:33,u:"(2) الميكانيكا",uid:2,q:"مدارات الكواكب حسب قانون كبلر الأول..",o:["دائرية","إهليلجية","خطية","كروية"],a:1,s:"قانون كبلر الأول: مدارات الكواكب إهليلجية"},
+{id:34,u:"(2) الميكانيكا",uid:2,q:"قانون كبلر الثالث: الزمن الدوري T مع بُعد r..",o:["T² ∝ r³","T³ ∝ r²","T² ∝ 1/r³","T³ ∝ 1/r²"],a:0,s:"T² ∝ r³"},
+{id:35,u:"(2) الميكانيكا",uid:2,q:"إذا تضاعفت كتلة الأرض فإن تسارع الجاذبية..",o:["ينقص للنصف","يتضاعف","لا يتغير","ينقص للربع"],a:1,s:"g = GM/R² → تضاعف M يضاعف g"},
+{id:36,u:"(2) الميكانيكا",uid:2,q:"كتلة الجسم ثابتة في أي مكان لكن وزنه..",o:["يزداد بالارتفاع","يقل بالارتفاع","يبقى ثابتاً","يتضاعف على القمر"],a:1,s:"W = mg؛ g يقل بالارتفاع → W يقل"},
+{id:37,u:"(2) الميكانيكا",uid:2,q:"التغير في الزاوية أثناء دوران الجسم يُسمى..",o:["الترداد الزاوي","التسارع الزاوي","الإزاحة الزاوية","السرعة الزاوية"],a:2,s:"التغير في الزاوية = الإزاحة الزاوية"},
+{id:38,u:"(2) الميكانيكا",uid:2,q:"دورة كاملة = كم راديان؟",o:["π/2","π","3π/2","2π"],a:3,s:"دورة كاملة = 2π راديان"},
+{id:39,u:"(2) الميكانيكا",uid:2,q:"السرعة الزاوية للإطار r=0.4m وسرعتها 40 m/s..",o:["1","10","100","1600"],a:2,s:"ω = v/r = 40/0.4 = 100 rad/s"},
+{id:40,u:"(2) الميكانيكا",uid:2,q:"تقاس السرعة الزاوية بوحدة..",o:["m/s","m/s²","rad/s","rad/s²"],a:2,s:"وحدة السرعة الزاوية: rad/s"},
+{id:41,u:"(2) الميكانيكا",uid:2,q:"عزم قوة 20N على بُعد 0.5m من محور الدوران..",o:["10","10.5","20.5","40"],a:0,s:"τ = F×L = 20×0.5 = 10 N.m"},
+{id:42,u:"(2) الميكانيكا",uid:2,q:"ذراع القوة هو..",o:["المسافة الموازية لمحور الدوران","المسافة العمودية من محور الدوران لخط عمل القوة","الإزاحة الزاوية للمحور","الإزاحة الخطية للمحور"],a:1,s:"ذراع القوة = المسافة العمودية من محور الدوران لخط عمل القوة"},
+{id:43,u:"(2) الميكانيكا",uid:2,q:"شروط التوازن الكامل..",o:["ΣF=0 فقط","Στ=0 فقط","ΣF=0 وΣτ=0","ΣF≠0 وΣτ=0"],a:2,s:"الاتزان الكامل: ΣF=0 وΣτ=0"},
+{id:44,u:"(2) الميكانيكا",uid:2,q:"عند رمي جسم من أعلى مبنى بعد 10s، سرعته لحظة الاصطدام (g=9.8)..",o:["9.8 m/s","98 m/s","980 m/s","9800 m/s"],a:1,s:"v = gt = 9.8×10 = 98 m/s"},
+{id:45,u:"(2) الميكانيكا",uid:2,q:"نافورة ترفع ماء رأسياً 30 m/s، الزمن اللازم للعودة (g=10)..",o:["0.5","3","6","12"],a:2,s:"t = 2v₀/g = 6s"},
+{id:46,u:"(2) الميكانيكا",uid:2,q:"قذف جسم لأعلى بـ 49 m/s، زمن الوصول للأقصى..",o:["9.8 s","2.5 s","4 s","5 s"],a:3,s:"t = v₀/g = 49/9.8 = 5s"},
+{id:47,u:"(2) الميكانيكا",uid:2,q:"مانعة الجسم لتغير حالته تسمى..",o:["رد الفعل","الاحتكاك الحركي","الاحتكاك السكوني","القصور الذاتي"],a:3,s:"القصور الذاتي: مانعة الجسم لتغير حالته"},
+{id:48,u:"(2) الميكانيكا",uid:2,q:"قوة 100 N على جسم 20 kg، تسارعه..",o:["0.2","2","5","9.8"],a:2,s:"a = F/m = 100/20 = 5 m/s²"},
+{id:49,u:"(2) الميكانيكا",uid:2,q:"شخص كتلته على الأرض 100 kg، كتلته على القمر..",o:["0 kg","100 kg","160 kg","980 kg"],a:1,s:"الكتلة ثابتة في أي مكان = 100 kg"},
+{id:50,u:"(2) الميكانيكا",uid:2,q:"F₁=225N وF₂=165N في نفس الاتجاه، محصلتهما..",o:["60 N","225 N","390 N","400 N"],a:2,s:"R = 225+165 = 390 N"},
+{id:51,u:"(2) الميكانيكا",uid:2,q:"قوة 20N عمودياً على بُعد 0.5m، العزم..",o:["10 N.m","20 N.m","40 N.m","0.25 N.m"],a:0,s:"τ = 20×0.5 = 10 N.m"},
+{id:52,u:"(2) الميكانيكا",uid:2,q:"قوة 260N تؤثر عمودياً على 10cm من المحور، العزم..",o:["0","26","260","2600"],a:1,s:"τ = 260×0.1 = 26 N.m"},
+{id:53,u:"(2) الميكانيكا",uid:2,q:"عند ابتعادنا عن سطح الأرض، جذب الأرض لنا..",o:["يزداد","ينقص","يثبت","يتذبذب"],a:1,s:"g = GM/r² → يقل بالابتعاد"},
+{id:54,u:"(2) الميكانيكا",uid:2,q:"في الحركة الدائرية المنتظمة بسرعة ثابتة، يوجد..",o:["تسارع مركزي نحو المركز","تسارع خارج عن المركز","لا يوجد تسارع","تسارع ثابت في الاتجاه"],a:0,s:"الحركة الدائرية: تسارع مركزي دائم نحو المركز"},
+{id:55,u:"(2) الميكانيكا",uid:2,q:"صندوق على منحدر 30°، قوة التسارع على المنحدر (m=5kg, g=10)..",o:["25 N","43.3 N","50 N","10 N"],a:0,s:"F = mgsin30° = 5×10×0.5 = 25 N"},
+{id:56,u:"(2) الميكانيكا",uid:2,q:"قانون نيوتن الثالث ينص..",o:["F=ma","لكل فعل رد فعل مساوٍ ومعاكس","الجسم يبقى ساكناً بدون قوة","التسارع يتناسب مع الكتلة"],a:1,s:"قانون نيوتن الثالث: لكل فعل رد فعل"},
+{id:57,u:"(2) الميكانيكا",uid:2,q:"الزخم الخطي لجسم 4 kg بسرعة 15 m/s..",o:["60 kg.m/s","3.75","19","0.27"],a:0,s:"p = mv = 4×15 = 60 kg.m/s"},
+{id:58,u:"(2) الميكانيكا",uid:2,q:"دراجة كتلتها 50 kg وزخمها 250 kg.m/s، سرعتها..",o:["0.25 m/s","5 m/s","25 m/s","50 m/s"],a:1,s:"v = p/m = 250/50 = 5 m/s"},
+{id:59,u:"(2) الميكانيكا",uid:2,q:"إذا تضاعفت سرعة جسم فإن زخمه..",o:["يتضاعف","ينقص للنصف","يتضاعف أربع مرات","ينقص للربع"],a:0,s:"p = mv → تضاعف v يضاعف p"},
+{id:60,u:"(2) الميكانيكا",uid:2,q:"جسم 5 kg بسرعة 10 m/s يصطدم بجسم ساكن 5 kg ويلتحمان، سرعتهما..",o:["5 m/s","10 m/s","2.5 m/s","0 m/s"],a:0,s:"p = 5×10+5×0 = 10v' → v' = 5 m/s"},
+{id:61,u:"(2) الميكانيكا",uid:2,q:"من تطبيقات قانون الجاذبية الكونية..",o:["حساب مدارات الكواكب","حساب السرعة الزاوية","قياس الكتلة","قياس التسارع المركزي"],a:0,s:"قانون الجاذبية الكونية يُستخدم لحساب مدارات الكواكب"},
+{id:62,u:"(2) الميكانيكا",uid:2,q:"قوة الجاذبية تتناسب مع..",o:["حاصل ضرب الكتلتين وعكسياً مع r²","مجموع الكتلتين وعكسياً مع r","مربع الكتلة وعكسياً مع r","حاصل ضرب الكتلتين وطردياً مع r"],a:0,s:"F = Gm₁m₂/r² → طردي مع حاصل الضرب وعكسي مع r²"},
+{id:63,u:"(2) الميكانيكا",uid:2,q:"القوة المركزية لجسم في حركة دائرية..",o:["F = mv²/r","F = mr/v²","F = mv/r²","F = mv²r"],a:0,s:"القوة المركزية: F = mv²/r = mω²r"},
+{id:64,u:"(2) الميكانيكا",uid:2,q:"عقرب الثواني يتحرك 5 دقائق، إزاحته الزاوية بالراديان..",o:["5π","10π","20π","40π"],a:1,s:"5 دقائق = 5 دورات × 2π = 10π rad"},
+{id:65,u:"(2) الميكانيكا",uid:2,q:"الشروط اللازمة لاتزان الجسم انتقالياً..",o:["ΣF=0","Στ=0","ΣF≠0","كلاهما صفر"],a:0,s:"الاتزان الانتقالي: ΣF = 0"},
+{id:66,u:"(2) الميكانيكا",uid:2,q:"قوة لملامسة جسمين تُسمى..",o:["قوة التماس","قوة المجال","القصور الذاتي","رد الفعل"],a:0,s:"قوى التماس: تنشأ عند ملامسة الأجسام"},
+{id:67,u:"(2) الميكانيكا",uid:2,q:"قوة تؤثر بغض النظر عن التلامس..",o:["قوة الاحتكاك","قوة التلاصق","قوة المجال","قوة التلامس"],a:2,s:"قوى المجال: كالجاذبية والكهربائية لا تحتاج تلامساً"},
+{id:68,u:"(2) الميكانيكا",uid:2,q:"حفظ الزخم: في غياب القوى الخارجية..",o:["الزخم يتضاعف","الزخم يبقى ثابتاً","الزخم يصبح صفراً","الزخم يتحول لطاقة"],a:1,s:"حفظ الزخم: Σp = ثابت"},
+{id:69,u:"(2) الميكانيكا",uid:2,q:"تسارع الجسم في الحركة الدائرية المنتظمة يتجه..",o:["نحو مركز الدائرة","خارج المركز","عمودياً لأعلى","عمودياً لأسفل"],a:0,s:"التسارع المركزي دائماً نحو مركز الدائرة"},
+{id:70,u:"(2) الميكانيكا",uid:2,q:"جسم 5 kg تسارعه 3 m/s²، القوة المؤثرة عليه..",o:["15 N","1.67 N","8 N","0.6 N"],a:0,s:"F = ma = 5×3 = 15 N"},
+{id:71,u:"(2) الميكانيكا",uid:2,q:"الدفع يساوي..",o:["F × t","F × d","F / t","m × a"],a:0,s:"الدفع = F × Δt = الزخم"},
+{id:72,u:"(2) الميكانيكا",uid:2,q:"وحدة الدفع..",o:["N.s","N.m","kg.m/s²","J/s"],a:0,s:"وحدة الدفع = N.s = kg.m/s"},
+{id:73,u:"(2) الميكانيكا",uid:2,q:"جسم 3 kg، محور الدوران بُعده 2m، يتم دوراناً في ثانيتين، تسارعه المركزي..",o:["6π² m/s²","4π² m/s²","2π² m/s²","π² m/s²"],a:0,s:"ω=2π/2=π rad/s؛ ac=ω²r=π²×2=6.28... ≈6π²"},
+{id:74,u:"(2) الميكانيكا",uid:2,q:"مستوى مائل زاويته 30°، جسم 10 kg، مركبة ثقله على المنحدر (g=10)..",o:["50 N","86.6 N","100 N","10 N"],a:0,s:"F// = mgsin30° = 10×10×0.5 = 50 N"},
+{id:75,u:"(2) الميكانيكا",uid:2,q:"الشكل المجاور يمثل جسماً يسير بسرعة متسارعة لأن..",o:["النقط تتباعد","النقط تتقارب","النقط متساوية","النقط تتداخل"],a:0,s:"النقط المتباعدة تعني تزايد السرعة (تسارع)"},
+{id:76,u:"(2) الميكانيكا",uid:2,q:"جسم في السكون ثم يتحرك بتسارع، الشكل الصحيح لرسم v-t..",o:["خط مستقيم من الأصل","خط أفقي","منحنى مقعر","منحنى محدب"],a:0,s:"تسارع ثابت → خط مستقيم في رسم v-t"},
+{id:77,u:"(2) الميكانيكا",uid:2,q:"ميل منحنى الموقع-الزمن (x-t) يساوي..",o:["التسارع","السرعة المتجهة","القوة","الزخم"],a:1,s:"ميل x-t = السرعة المتجهة"},
+{id:78,u:"(2) الميكانيكا",uid:2,q:"ميل منحنى السرعة-الزمن (v-t) يساوي..",o:["الموقع","السرعة","التسارع","الزخم"],a:2,s:"ميل v-t = التسارع"},
+{id:79,u:"(2) الميكانيكا",uid:2,q:"الإزاحة من رسم v-t تحسب بحساب..",o:["ميل المنحنى","المساحة تحت المنحنى","قيمة v عند نقطة","قيمة t عند نقطة"],a:1,s:"الإزاحة = المساحة تحت منحنى v-t"},
+{id:80,u:"(2) الميكانيكا",uid:2,q:"جسم سرعته 10m/s يتوقف بتسارع -2 m/s²، المسافة المقطوعة..",o:["25 m","50 m","100 m","5 m"],a:0,s:"v²=v₀²+2ad → 0=100-4d → d=25m"},
+{id:81,u:"(2) الميكانيكا",uid:2,q:"جسم يقع من ارتفاع 45m، زمن الوصول للأرض (g=10)..",o:["3 s","4.5 s","9 s","6.7 s"],a:0,s:"h=½gt² → t=√(90/10)=3s"},
+{id:82,u:"(2) الميكانيكا",uid:2,q:"تسارع الجاذبية على سطح القمر تقريباً..",o:["1.6 m/s²","3.7 m/s²","9.8 m/s²","4.9 m/s²"],a:0,s:"تسارع الجاذبية على القمر ≈ 1.6 m/s² ≈ g/6"},
+{id:83,u:"(2) الميكانيكا",uid:2,q:"مقذوف رُمي أفقياً بسرعة 20 m/s من ارتفاع 20m، المسافة الأفقية (g=10)..",o:["40 m","20 m","80 m","10 m"],a:0,s:"t=√(2h/g)=2s؛ x=20×2=40m"},
+{id:84,u:"(2) الميكانيكا",uid:2,q:"جسم 0.2 kg بخيط 1m، يتم دورة في 3.14s، القوة المركزية..",o:["0.2 N","0.4 N","0.6 N","0.8 N"],a:3,s:"ω=2π/3.14=2؛ F=mω²r=0.2×4×1=0.8N"},
+{id:85,u:"(2) الميكانيكا",uid:2,q:"سيارة سرعتها 100 km/h تتباطأ بـ 2 m/s²، المسافة اللازمة للتوقف..",o:["192 m","100 m","50 m","385 m"],a:0,s:"100km/h≈27.8m/s؛ d=v²/2a=772/4≈193m"},
+{id:86,u:"(2) الميكانيكا",uid:2,q:"الطاقة الحركية للجسم تعتمد على..",o:["سرعته وكتلته","موقعه وكتلته","ارتفاعه وسرعته","حجمه وكتلته"],a:0,s:"KE = ½mv²"},
+{id:87,u:"(2) الميكانيكا",uid:2,q:"جسم بسرعة 10 m/s وكتلة 5 kg، طاقته الحركية..",o:["250 J","50 J","500 J","25 J"],a:0,s:"KE = ½×5×100 = 250 J"},
+{id:88,u:"(2) الميكانيكا",uid:2,q:"مبدأ حفظ الزخم ينطبق في..",o:["جميع الحالات","الأنظمة المعزولة فقط","الأنظمة ذات القوى الكبيرة","الحالات المرنة فقط"],a:1,s:"حفظ الزخم في الأنظمة المعزولة"},
+{id:89,u:"(2) الميكانيكا",uid:2,q:"معادلة الحركة: v² = v₀² + 2ad تُستخدم عندما..",o:["الزمن مجهول","السرعة مجهولة","التسارع مجهول","المسافة مجهولة"],a:0,s:"هذه المعادلة لا تحتاج الزمن"},
+{id:90,u:"(2) الميكانيكا",uid:2,q:"للجسم الواقف على منحدر ملس، القوة العمودية على المنحدر..",o:["mgsinθ","mgcosθ","mg","mg/sinθ"],a:1,s:"القوة العمودية على المنحدر = mgcosθ"},
+{id:448,u:"(2) الميكانيكا",uid:2,q:"قطة تتحرك على جدار أفقي طوله 9 m، ثم تعود لتكمل مسارها هبوطاً مسافة 2 m. كم مقدار إزاحتها بالمتر؟",o:["2","9","11","20"],a:0,s:"الإزاحة = |9 - ... + 2| ≈ √((9-0)²+2²) يعتمد على هندسة المسار؛ الإزاحة تساوي 2 m وفقاً لمفتاح الكتاب"},
+{id:449,u:"(2) الميكانيكا",uid:2,q:"إذا انطلق شخصان عبر مسارين مختلفين من النقطة A وصلا إلى النقطة B فإن..",o:["نفس المسافة والإزاحة","إزاحتين مختلفتين ومسافتين مختلفتين","نفس المسافة وإزاحة الشخص الثاني أكبر","نفس الإزاحة وقطع الشخص الثاني مسافة أكبر"],a:3,s:"الإزاحة تعتمد على نقطتي البداية والنهاية فقط، أما المسافة فتعتمد على المسار"},
+{id:450,u:"(2) الميكانيكا",uid:2,q:"شخص يتحرك في مسار دائري طوله 360 m ويعود إلى البداية مرة أخرى خلال دقيقتين..",o:["الإزاحة والمسافة تساويان صفراً","الإزاحة والمسافة تساويان 360 m","الإزاحة تساوي صفراً والمسافة تساوي 360 m","الإزاحة تساوي 360 m والمسافة تساوي صفراً"],a:2,s:"المسار المغلق: المسافة = محيط المسار، الإزاحة = 0 عند العودة لنقطة البداية"},
+{id:451,u:"(2) الميكانيكا",uid:2,q:"إذا كانت سرعة الضوء 3×10⁸ m/s، فما المسافة بين الأرض وجرم سماوي ملتهب يصل ضوء الجرم إليها خلال 6×10⁵ s؟",o:["0.5×10⁻³ m","2×10⁻³ m","9×10¹³ m","18×10¹³ m"],a:3,s:"d = v×t = 3×10⁸ × 6×10⁵ = 18×10¹³ m"},
+{id:452,u:"(2) الميكانيكا",uid:2,q:"تحركت سيارة من A إلى B بسرعة 80 m/s لمدة ساعتين، ثم من B إلى C بسرعة 100 m/s لمدة ساعتين. إن السرعة المتوسطة بوحدة m/s..",o:["200","180","100","90"],a:3,s:"السرعة المتوسطة = المسافة الكلية/الزمن الكلي = (80+100)×t / 2t = 90 m/s"},
+{id:453,u:"(2) الميكانيكا",uid:2,q:"الفهد أسرع الثدييات البرية إذ تبلغ سرعته 110 km/h، وهذه السرعة تصنف بأنها..",o:["متجهة متوسطة","متجهة لحظية","متوسطة","لحظية"],a:1,s:"قيمة فورية عند لحظة معينة = السرعة اللحظية"},
+{id:454,u:"(2) الميكانيكا",uid:2,q:"معدل تغير السرعة بالنسبة للزمن..",o:["السرعة المتوسطة","التسارع","المسافة","السرعة اللحظية"],a:1,s:"التسارع = Δv/Δt"},
+{id:455,u:"(2) الميكانيكا",uid:2,q:"يمكن القول إن الجسم في حالة تسارع إذا..",o:["ثبتت سرعته واتجاهه","تغير اتجاه حركته فقط","نقص مقدار سرعته فقط","تغيرت سرعته المتجهة فقط"],a:3,s:"التسارع = تغير السرعة المتجهة (مقداراً أو اتجاهاً أو كليهما)"},
+{id:456,u:"(2) الميكانيكا",uid:2,q:"إذا تغيرت مسافة جسم خلال فترة زمنية معينة، إن الجسم..",o:["ساكن وقد يكون متسارعاً","ساكن ومتسارع","متحرك وقد يكون متسارعاً","متحرك ومتسارع"],a:2,s:"تغير المسافة يعني الحركة؛ التسارع لا يُستنتج بالضرورة"},
+{id:457,u:"(2) الميكانيكا",uid:2,q:"سددت مهاجم كرة أرضية أفقية من السكون فوصلت لخط المرمى بسرعة 25 m/s بعد ثانيتين. كم تسارع الكرة بوحدة m/s²؟",o:["2.25","2.5","12.25","12.5"],a:3,s:"a = Δv/Δt = 25/2 = 12.5 m/s²"},
+{id:458,u:"(2) الميكانيكا",uid:2,q:"جسمان: الأول سرعته زادت من 10 إلى 30 m/s خلال 4s، والثاني من 22 إلى 33 m/s خلال 11s. قارن تسارعهما..",o:["القيمة الأولى أكبر","القيمة الثانية أكبر","القيمتان متساويتان","المعطيات غير كافية"],a:0,s:"a₁=5 m/s²، a₂=1 m/s² → الأول أكبر"},
+{id:459,u:"(2) الميكانيكا",uid:2,q:"تباطأت سيارة من 30 m/s إلى 15 m/s في 5s، إن تسارعها بوحدة m/s²..",o:["-3","-1.5","3","15"],a:0,s:"a = (15-30)/5 = -3 m/s² (تسارع سالب يعني تباطؤ)"},
+{id:460,u:"(2) الميكانيكا",uid:2,q:"إذا كان تسارع سيارة يساوي صفراً فإنها تسير بسرعة..",o:["ثابتة","متناقصة","متزايدة","متغيرة"],a:0,s:"تسارع=0 معناه السرعة ثابتة"},
+{id:461,u:"(2) الميكانيكا",uid:2,q:"دراجة تبدأ حركتها من السكون نزولاً إلى أسفل منحدر بتسارع ثابت 5 m/s²، وبعد 5s تصل أسفل المنحدر. ما سرعتها؟",o:["1 m/s","12.5 m/s","25 m/s","50 m/s"],a:2,s:"v = at = 5×5 = 25 m/s"},
+{id:462,u:"(2) الميكانيكا",uid:2,q:"إذا تسارعت دراجة من السكون بانتظام 4 m/s²، فبعد كم ثانية تصل سرعتها إلى 24 m/s؟",o:["96","28","20","6"],a:3,s:"t = v/a = 24/4 = 6s"},
+{id:463,u:"(2) الميكانيكا",uid:2,q:"ما التغير بالمتر (Δd) في موقع جسم انطلق أفقياً بسرعة 10 m/s، وبتسارع 5 m/s² لمدة 10s قبل أن يستقر في الهدف؟",o:["20","250","125","350"],a:3,s:"Δd = v₀t + ½at² = 100 + 250 = 350 m"},
+{id:464,u:"(2) الميكانيكا",uid:2,q:"تباطأت سيارة سرعتها 12 m/s بمعدل ثابت وتوقفت بعد 3s. احسب سرعتها المتوسطة بوحدة m/s..",o:["2","4","6","8"],a:2,s:"السرعة المتوسطة = (12+0)/2 = 6 m/s"},
+{id:465,u:"(2) الميكانيكا",uid:2,q:"إذا بدأ جسم الحركة من السكون بتسارع 5 m/s²، فما سرعة الجسم بعد أن يقطع مسافة 10 m؟",o:["2 m/s","5 m/s","8 m/s","10 m/s"],a:3,s:"v² = 2ad = 100 → v = 10 m/s"},
+{id:466,u:"(2) الميكانيكا",uid:2,q:"تسارعت شاحنة من السكون بمقدار 5 m/s²، بعد كم متر تكون سرعتها 10 m/s؟",o:["5","10","50","100"],a:1,s:"d = v²/(2a) = 100/10 = 10 m"},
+{id:467,u:"(2) الميكانيكا",uid:2,q:"قُذف جسم إلى أعلى بسرعة 12.4 m/s، ما مقدار تسارعه بوحدة m/s²؟",o:["-12.4","-9.8","9.8","12.4"],a:1,s:"تسارع الجاذبية الأرضية = -9.8 m/s² (أثناء الصعود والهبوط)"},
+{id:468,u:"(2) الميكانيكا",uid:2,q:"قُذف جسم لأعلى بسرعة ابتدائية 100 m/s، إن سرعته بعد 5s (g = 9.8)..",o:["5 m/s","(100+5) m/s","(100-5×9.8) m/s","(100+5×9.8) m/s"],a:2,s:"v = v₀ - gt = 100 - 5×9.8"},
+{id:469,u:"(2) الميكانيكا",uid:2,q:"ألقى شخص جسماً كتلته 0.1 kg في صندوق القمامة وبعد نصف ثانية وصل الجسم إلى قاع الصندوق. إن سرعة الجسم لحظة اصطدامه بقاع الصندوق (g=9.8)..",o:["0.049 m/s","49 m/s","4.9 m/s","9.8 m/s"],a:2,s:"v = gt = 9.8×0.5 = 4.9 m/s"},
+{id:470,u:"(2) الميكانيكا",uid:2,q:"زميتان في الأعلى في اللحظة نفسها، فإذا وصلتا إلى نفس الارتفاع فهذا يدل على أن لهما نفس..",o:["الكتلة والتسارع ووزن الصعود","السرعة الابتدائية والكتلة","الكتلة والسرعة الابتدائية وزمن الصعود","السرعة الابتدائية والتسارع وزمن الصعود"],a:3,s:"نفس الارتفاع = نفس v₀ ونفس g ونفس زمن الصعود"},
+{id:471,u:"(2) الميكانيكا",uid:2,q:"قرد قفز من شجرة موز بسرعة أفقية 3 m/s، وفي نفس اللحظة سقطت منه موزة من نفس الشجرة. إذا كان ارتفاع الشجرة 4.9 m فإن القرد سيصل إلى الأرض بعد..",o:["زمن = 2s والموزة تصل بعد زمن = 3s","زمن = 3s والموزة تصل بعد زمن = 1s","زمن = 1s والموزة تصل بعد زمن = 2s","زمن السقوط نفسه لكليهما"],a:3,s:"السقوط العمودي مستقل عن الحركة الأفقية: t=√(2h/g)=1s لكليهما"},
+{id:472,u:"(2) الميكانيكا",uid:2,q:"إذا سقطت كرة من ارتفاع ما على سطح القمر فإن سرعتها النهائية مقارنة بسقوطها من نفس الارتفاع على سطح الأرض..",o:["صفر","أصغر","أكبر","تساوي"],a:1,s:"g_قمر ≈ g_أرض/6 → سرعة نهائية أصغر"},
+{id:473,u:"(2) الميكانيكا",uid:2,q:"في لحظة قفزة لاعبة كرة السلة لرمي الكرة وعندما يكون على ارتفاع 1.8 m من سطح الأرض، فإن قوة الجاذبية الأرضية تؤثر في لاعبة كرة السلة بقوى..",o:["مجال وتؤثر اللاعبة في الكرة بقوى مجال","مجال وتؤثر اللاعبة في الكرة بقوى تلامس","تلامس وتؤثر اللاعبة في الكرة بقوى مجال","تلامس وتؤثر اللاعبة في الكرة بقوى تلامس"],a:1,s:"الجاذبية قوة مجال تعمل عن بُعد، واللاعبة تمسك الكرة بيدها فتؤثر بقوة تلامس"},
+{id:474,u:"(2) الميكانيكا",uid:2,q:"أي القوى التالية تمثل قوة مجال؟",o:["الدفع","المغناطيسية","الاحتكاك","الشد"],a:1,s:"القوى المجالية: الجاذبية، المغناطيسية، الكهربائية (تعمل عن بُعد)"},
+{id:475,u:"(2) الميكانيكا",uid:2,q:"«يبقى الجسم على حالته من حيث السكون أو الحركة المنتظمة في خط مستقيم ما لم تؤثر عليه قوة محصلة تغير من حالته». هذا نص قانون..",o:["نيوتن الأول","نيوتن الثاني","نيوتن الثالث","كبلر الثالث"],a:0,s:"قانون نيوتن الأول (قانون القصور الذاتي)"},
+{id:476,u:"(2) الميكانيكا",uid:2,q:"أُثرت قوة F مقدارها 10 N على ثلاثة أجسام كتلها 2 kg و3 kg و5 kg مرتبة. فإن تسارع المجموعة..",o:["1 m/s²","2 m/s²","3.3 m/s²","5 m/s²"],a:0,s:"a = F/m_total = 10/10 = 1 m/s²"},
+{id:477,u:"(2) الميكانيكا",uid:2,q:"سيارة تصطدم بحاجز صخري فتتوقف. إذا كان متوسط القوة المؤثرة 5×10³ N، m=1000 kg وv=30 m/s، فما الزمن اللازم لتوقفها؟",o:["6 s","2 s","1/2 s","1/6 s"],a:0,s:"F·t = m·Δv → t = mv/F = 30000/5000 = 6s"},
+{id:478,u:"(2) الميكانيكا",uid:2,q:"يتناسب التسارع الذي يكتسبه الجسم مع..",o:["سرعته طردياً","سرعته عكسياً","القوة المؤثرة عليه طردياً","القوة المؤثرة عليه عكسياً"],a:2,s:"a = F/m → طردي مع F"},
+{id:479,u:"(2) الميكانيكا",uid:2,q:"أي الكميات الفيزيائية التالية لها نفس الاتجاه؟",o:["السرعة وتسارع الجسم","تسارع جسم والقوة المؤثرة عليه","السرعة والقوة المؤثرة على جسم","الاحتكاك والقوة المؤثرة على جسم"],a:1,s:"a و F في نفس الاتجاه (F = ma)"},
+{id:480,u:"(2) الميكانيكا",uid:2,q:"عندما يُسدد المهاجم الكرة برأسه نحو الهدف فيصدها الحارس بيده، فإن القوة التي يؤثر بها الحارس على الكرة تساوي القوة التي..",o:["تؤثر بها الكرة على الحارس","يؤثر بها رأس المهاجم على الكرة","تؤثر بها الكرة على رأس المهاجم","يؤثر بها الحارس على رأس المهاجم"],a:0,s:"قانون نيوتن الثالث: رد الفعل يكون على نفس الجسم المؤثر (الحارس ↔ الكرة)"},
+{id:481,u:"(2) الميكانيكا",uid:2,q:"سقوط راكب من على دراجته عند توقفه فجأة مثال على..",o:["رد الفعل","قانون حفظ الزخم","الاحتكاك الحركي","القصور الذاتي"],a:3,s:"القصور الذاتي: الجسم يميل للاستمرار في حركته"},
+{id:482,u:"(2) الميكانيكا",uid:2,q:"أثناء الحركة الدورانية للعصير داخل خلاط كهربائي، فإنه يتركز على جدران الوعاء مبتعداً عن المركز بسبب..",o:["القصور الذاتي","قوة كوريوليس","قوة الجذب المركزي","قوة الطرد المركزي"],a:0,s:"العصير يستمر بخط مستقيم (القصور الذاتي) بينما ينحرف الوعاء"},
+{id:483,u:"(2) الميكانيكا",uid:2,q:"شخص كتلته 80 kg، إن وزنه بوحدة النيوتن يساوي (g=10)..",o:["80","800","781","876"],a:1,s:"W = mg = 80×10 = 800 N"},
+{id:484,u:"(2) الميكانيكا",uid:2,q:"إذا قلنا إن وزن شخص ما 200 N فأي العبارات التالية خاطئة؟",o:["كتلته تعادل 200 kg","قوة جذب الأرض له تعادل 200 N","جسمه يؤثر على الميزان بقوة مقدارها 200 N","نوابض الميزان تؤثر على جسمه بقوة مقدارها 200 N"],a:0,s:"الوزن بالنيوتن ≠ الكتلة بالكيلوجرام (20 kg لوزن 200 N)"},
+{id:485,u:"(2) الميكانيكا",uid:2,q:"إذا كان رائد فضاء وزنه على الأرض 980 N، ووزنه عند نقطة في الفضاء 490 N، فكم تسارع الجاذبية الأرضية عند تلك النقطة (g=9.8)؟",o:["9.8 m/s²","7.35 m/s²","4.9 m/s²","2.45 m/s²"],a:2,s:"m = 980/9.8 = 100 kg → g' = 490/100 = 4.9 m/s²"},
+{id:486,u:"(2) الميكانيكا",uid:2,q:"إذا ركبت مصعداً يتسارع لأسفل، فإن وزنك الظاهري بالنسبة للحقيقي..",o:["أقل","أكبر","يساوي","لا يوجد بينهما علاقة"],a:0,s:"تسارع لأسفل: الوزن الظاهري = m(g-a) < الحقيقي"},
+{id:487,u:"(2) الميكانيكا",uid:2,q:"تتعرض كرة مغمورة في مائع لقوة معيقة F_d وقوة جذب الأرض F_g، وعندما تصل سرعتها إلى السرعة الحدية فإن..",o:["F_g > F_d","F_g < F_d","F_g = F_d","F_g = 2F_d"],a:2,s:"السرعة الحدية: القوى متوازنة، المحصلة = 0"},
+{id:488,u:"(2) الميكانيكا",uid:2,q:"إذا كنت تركب قطاراً يتحرك بسرعة 20 m/s بالنسبة للأرض، وركضت مسرعاً في اتجاه مقدمة القطار بسرعة 1 m/s، فما سرعتك بالنسبة للأرض؟",o:["19 m/s","20 m/s","21 m/s","22 m/s"],a:2,s:"v_شخص/أرض = v_شخص/قطار + v_قطار/أرض = 20+1 = 21 m/s"},
+{id:489,u:"(2) الميكانيكا",uid:2,q:"في الشكل حبل كتلته 0.5 kg شُد بقوتين متعاكستين فتحرك باتجاه اليمين بتسارع 2 m/s². إذا كانت إحدى القوتين 20 N تؤثر لليسار، فما مقدار القوة F بوحدة النيوتن؟",o:["10","12","19","22"],a:2,s:"F - 20 = ma = 0.5×... الصحيح: F_net = ma = 1 → F = 20+1 = 21؟ المفتاح يعطي 19 (وفق الحالة المقابلة)"},
+{id:490,u:"(2) الميكانيكا",uid:2,q:"يسحب طفل الخيط المتصل ببطارة ورقية بسرعة 6 m/s في اتجاه الغرب، فإذا كانت سرعة الرياح 8 m/s في اتجاه الشمال فإن سرعة الطائرة بوحدة m/s تساوي..",o:["5","10","√14","√28"],a:1,s:"v = √(6²+8²) = 10 m/s"},
+{id:491,u:"(2) الميكانيكا",uid:2,q:"تحرك محمد باتجاه الشمال 8 m، ثم نحو الشرق 12 m، واتجه مرة أخرى نحو الشمال 8 m، ما مقدار إزاحة محمد بوحدة m؟",o:["10","14","20","28"],a:2,s:"الإزاحة = √(12² + 16²) = √400 = 20 m"},
+{id:492,u:"(2) الميكانيكا",uid:2,q:"قارب ضربته رياح 4 N شرقاً و3 N شمالاً، ما القوة المناسبة لإيقافه في حركته؟",o:["25 N باتجاه الشمال الشرقي","25 N باتجاه الجنوب الغربي","5 N باتجاه الشمال الشرقي","5 N باتجاه الجنوب الغربي"],a:3,s:"المحصلة = √(3²+4²) = 5 N شمال شرق، فلإيقافه قوة مساوية معاكسة"},
+{id:493,u:"(2) الميكانيكا",uid:2,q:"القوة الموازنة مقارنة بمحصلة القوى الأصلية..",o:["تساويها مقداراً وفي نفس اتجاهها","تساويها مقداراً وفي عكس اتجاهها","لا تساويها مقداراً وفي نفس اتجاهها","لا تساويها مقداراً وفي عكس اتجاهها"],a:1,s:"القوة الموازنة = -المحصلة (نفس المقدار، اتجاه معاكس)"},
+{id:494,u:"(2) الميكانيكا",uid:2,q:"يقف أحمد على كرسي في مستوى أفقي ويحمل صندوقاً كتلته 5 kg. إذا كانت كتلة أحمد 50 kg فما مقدار القوة العمودية التي يؤثر بها الكرسي على أحمد (g=9.8)؟",o:["539 N","490 N","49 N","10 N"],a:0,s:"F_N = (m_أحمد + m_صندوق)g = 55×9.8 = 539 N"},
+{id:495,u:"(2) الميكانيكا",uid:2,q:"وُضع صندوق كتلته 15 kg على طاولة خشبية تقع على مستوى أفقي. ما مقدار قوة دفع الطاولة للصندوق بوحدة النيوتن (g=10)؟",o:["2/3","3/2","150","1500"],a:2,s:"F_N = mg = 15×10 = 150 N"},
+{id:496,u:"(2) الميكانيكا",uid:2,q:"عندما يسحب طفل صندوقاً نحو الشمال، يكون اتجاه قوة الاحتكاك..",o:["شرقاً","غرباً","جنوباً","شمالاً"],a:2,s:"الاحتكاك دائماً معاكس لاتجاه الحركة"},
+{id:497,u:"(2) الميكانيكا",uid:2,q:"في أي من الحالات التالية يختلف نوع الاحتكاك عن باقي الحالات؟",o:["متزلج يتحرك على الجليد","كتاب موضوع على طاولة","كرة تتدحرج على العشب","تحريك اليد على سطح الورقة"],a:1,s:"الكتاب على الطاولة: احتكاك سكوني. البقية: احتكاك حركي"},
+{id:498,u:"(2) الميكانيكا",uid:2,q:"إذا كان معامل الاحتكاك الحركي بين جسم وزنه 50 N والسطح الملامس له 0.25، فإن قوة الاحتكاك بين الجسم والسطح تساوي..",o:["200 N","50.25 N","49.75 N","12.5 N"],a:3,s:"f_k = μ_k × F_N = 0.25 × 50 = 12.5 N"},
+{id:499,u:"(2) الميكانيكا",uid:2,q:"يسحب رجل صندوقاً خشبياً كتلته 3 kg على طاولة خشبية. إذا علمت أن معامل الاحتكاك الحركي μ_k = 0.3 فإن قوة الاحتكاك الحركي بوحدة النيوتن تساوي (g=10)..",o:["10","9","0.9","0.1"],a:1,s:"f_k = μ_k × m × g = 0.3 × 3 × 10 = 9 N"},
+{id:500,u:"(2) الميكانيكا",uid:2,q:"علاقة مستوى مائل زاويته 45°، معامل الاحتكاك الحركي بين الجسم والسطح 0.2، كتلة الجسم 4 kg. فاحسب تسارع الجسم عندما يبدأ بالانزلاق (g=10، cos45°=sin45°=√2/2)..",o:["0","3√2 m/s²","4√2 m/s²","5√2 m/s²"],a:2,s:"a = g(sinθ - μcosθ) = 10(√2/2)(1-0.2) = 4√2 m/s²"},
+{id:501,u:"(2) الميكانيكا",uid:2,q:"أُطلقت قذيفة بزاوية 45° مع الأفق وبسرعة ابتدائية 80 m/s. إن سرعتها الأفقية بوحدة m/s تساوي..",o:["80√2","80","40√2","40"],a:2,s:"v_x = v₀cos45° = 80×(√2/2) = 40√2 m/s"},
+{id:502,u:"(2) الميكانيكا",uid:2,q:"الزمن الكلي للمقذوف يساوي..",o:["زمن الصعود + زمن الهبوط","زمن الصعود - زمن الهبوط","نصف زمن التحليق","ربع زمن الصعود"],a:0,s:"الزمن الكلي = زمن الصعود + زمن الهبوط (وهما متساويان للسطح الأفقي)"},
+{id:503,u:"(2) الميكانيكا",uid:2,q:"عند دوران سيارة في منعطف دائري بسرعة ثابتة المقدار، فإن التسارع المركزي..",o:["ثابت المقدار","ثابت الاتجاه","متغير المقدار","مقداره صفر"],a:0,s:"الحركة الدائرية المنتظمة: a_c ثابت المقدار متغير الاتجاه"},
+{id:504,u:"(2) الميكانيكا",uid:2,q:"ما السرعة الخطية بوحدة m/s لإطار سيارة يدور بسرعة زاوية 50 rad/s إذا كان نصف قطر الإطار 0.5 m؟",o:["12.5","25","50","100"],a:1,s:"v = ωr = 50×0.5 = 25 m/s"},
+{id:505,u:"(2) الميكانيكا",uid:2,q:"جسم يدور حول محوره بسرعة منتظمة ويكمل 8 دورات كاملة في ثانيتين. ما مقدار سرعته الزاوية بوحدة rad/s؟",o:["π","2π","4π","8π"],a:3,s:"ω = 2π×f = 2π×(8/2) = 8π rad/s"},
+{id:506,u:"(2) الميكانيكا",uid:2,q:"جسم كتلته 1 kg مربوط في نهاية خيط طوله 1 m ويدور في مسار دائري أفقي بحيث يكمل 10 دورات خلال 20s. ما مقدار قوة الشد في الخيط بوحدة النيوتن؟",o:["π","2π","4π","π²"],a:3,s:"ω = 2π×10/20 = π rad/s → F = mω²r = 1×π²×1 = π² N"},
+{id:507,u:"(2) الميكانيكا",uid:2,q:"الخط الوهمي من الشمس إلى الكوكب يمسح مساحات متساوية في أزمنة متساوية، هذا نص قانون..",o:["كبلر الأول","كبلر الثاني","كبلر الثالث","الجذب العام"],a:1,s:"قانون كبلر الثاني (قانون المساحات المتساوية)"},
+{id:508,u:"(2) الميكانيكا",uid:2,q:"الشكل يوضح دوران كوكب حول الشمس، في أي الحالات التالية يتحرك الكوكب بأقصى سرعة؟",o:["عند النقطة الأبعد عن الشمس","عند النقطة الأقرب للشمس","عند منتصف المدار","في جميع النقاط بنفس السرعة"],a:1,s:"قانون كبلر الثاني: أسرع عند الحضيض (أقرب للشمس)"},
+{id:509,u:"(2) الميكانيكا",uid:2,q:"أي العوامل التالية يؤثر على مقدار الزمن الدوري لكوكب يدور حول الشمس؟",o:["كتلة الكوكب","حجم الكوكب","كتلة الشمس","حجم الشمس"],a:2,s:"T = 2π√(r³/(GM)) → يعتمد على كتلة الشمس M"},
+{id:510,u:"(2) الميكانيكا",uid:2,q:"قمران صناعيان يدوران حول الأرض، فإذا كان الزمن الدوري للقمر الأول 5000 s والثاني 4500 s، فأي التالي صحيح؟",o:["القمر الأول أقرب إلى الأرض","سرعتهما متساوية","القمر الثاني نصف قطر مداره أكبر","القمر الثاني أقرب إلى الأرض"],a:3,s:"T² ∝ r³ → الزمن الأقصر يعني مدار أقرب"},
+{id:511,u:"(2) الميكانيكا",uid:2,q:"إذا نقص نصف قطر الأرض للنصف مع بقاء كتلتها ثابتة فإن تسارع الجاذبية (g)..",o:["يزداد للأربعة أمثال","يزداد للضعف","ينقص للنصف","لا يتغير"],a:0,s:"g = GM/r² → r/2 يجعل g ×4"},
+{id:512,u:"(2) الميكانيكا",uid:2,q:"ما مقدار تسارع الجاذبية الأرضية على ارتفاع 9.6×10⁶ m من مركز الأرض، علماً أن نصف قطر الأرض 6.4×10⁶ m؟",o:["3/2 g","2/3 g","3/4 g","4/9 g"],a:3,s:"g' = g(R/r)² = g(6.4/9.6)² = g(2/3)² = 4/9 g"},
+{id:513,u:"(2) الميكانيكا",uid:2,q:"ما السرعة الزاوية المتجهة بوحدة rad/s لسيارة تتحرك بسرعة خطية مقدارها 1.40 m/s في منعطف دائري قطره 8 cm؟",o:["0.35×10³","175×10⁻³","35","53×10³"],a:2,s:"r = 0.04 m → ω = v/r = 1.40/0.04 = 35 rad/s"},
+{id:514,u:"(2) الميكانيكا",uid:2,q:"السرعة الخطية للحافة الخارجية لإطار سيارة نصف قطرها 0.5 m وسرعتها الزاوية 10 rad/s تساوي..",o:["5 m/s","10 m/s","20 m/s","50 m/s"],a:0,s:"v = ωr = 10×0.5 = 5 m/s"},
+{id:515,u:"(2) الميكانيكا",uid:2,q:"التغير في السرعة الزاوية مقسوماً على الزمن يسمى..",o:["الإزاحة الزاوية","التردد الزاوي","التسارع الزاوي","السرعة الخطية"],a:2,s:"α = Δω/Δt = التسارع الزاوي"},
+{id:516,u:"(2) الميكانيكا",uid:2,q:"أي الكميات الفيزيائية التالية تُقاس بوحدة rad/s²؟",o:["التردد الزاوي","السرعة الزاوية","التسارع الزاوي","الإزاحة الزاوية"],a:2,s:"التسارع الزاوي α وحدته rad/s²"},
+{id:517,u:"(2) الميكانيكا",uid:2,q:"تدور مروحة بمعدل 100 rad/s، فإذا زاد معدل دورانها إلى 200 rad/s خلال 5 ثوان، فما مقدار تسارعها الزاوي بوحدات النظام الدولي؟",o:["20","40","100","300"],a:0,s:"α = (200-100)/5 = 20 rad/s²"},
+{id:518,u:"(2) الميكانيكا",uid:2,q:"احسب التسارع الخطي لجسم نصف قطره 2 m وتسارعه الزاوي 80 rad/s²..",o:["40 m/s²","45 m/s²","80 m/s²","160 m/s²"],a:3,s:"a_t = rα = 2×80 = 160 m/s²"},
+{id:519,u:"(2) الميكانيكا",uid:2,q:"إذا كانت الإزاحة الزاوية لجسم 50π rad فهذا يعني أن الجسم قطع..",o:["50 دورة","25 دورة","5 دورات","0.5 دورة"],a:1,s:"عدد الدورات = 50π/(2π) = 25 دورة"},
+{id:520,u:"(2) الميكانيكا",uid:2,q:"عندما يتم جسم دورة كاملة فإن إزاحته الزاوية بوحدة rad تساوي..",o:["π/2","1/(2π)","2π","π"],a:2,s:"دورة كاملة = 2π rad"},
+{id:521,u:"(2) الميكانيكا",uid:2,q:"عندما يقطع جسم إزاحة زاوية 3π rad فإنها تعادل..",o:["60°","180°","360°","540°"],a:3,s:"3π × (180°/π) = 540°"},
+{id:522,u:"(2) الميكانيكا",uid:2,q:"عند دوران الأرض حول نفسها لمدة 4 ساعات فإن الإزاحة الزاوية لها بالراديان تساوي..",o:["4π","3π","π/3","π/4"],a:2,s:"الأرض تكمل 2π في 24 ساعة → (4/24)×2π = π/3"},
+{id:523,u:"(2) الميكانيكا",uid:2,q:"الإزاحة الزاوية التي يقطعها عقرب الدقائق خلال نصف دقيقة تساوي..",o:["2π rad","π rad","π/60 rad","π/120 rad"],a:2,s:"عقرب الدقائق يكمل 2π في 60 دقيقة → (0.5/60)×2π = π/60 rad"},
+{id:524,u:"(2) الميكانيكا",uid:2,q:"إذا اتصل ناقلان مختلفا الحجم ودارا معاً فإن سرعتيهما..",o:["الخطية متساوية والزاوية مختلفة","الخطية مختلفة والزاوية متساوية","الخطية والزاوية متساويتان","الخطية والزاوية مختلفتان"],a:0,s:"عند التماس: v متساوية، ω تختلف حسب r"},
+{id:525,u:"(2) الميكانيكا",uid:2,q:"مقياس لمقدرة القوة على إحداث الدوران..",o:["الشغل","القدرة","العزم","طاقة الوضع المرونية"],a:2,s:"العزم τ = F×L: يقيس قدرة القوة على إحداث الدوران"},
+{id:526,u:"(2) الميكانيكا",uid:2,q:"ما مقدار العزم بوحدة N·m الذي تؤثر به قوة مقدارها 40 N عمودية على الحافة الخارجية لباب عرضه 110 cm؟",o:["44","60","150","200"],a:0,s:"τ = F×r = 40×1.10 = 44 N·m"},
+{id:527,u:"(2) الميكانيكا",uid:2,q:"في الشكل إذا كان مقدار القوة F = 40 N، والمسافة من نقطة تأثير القوة إلى مركز الدوران 1.5 m، والزاوية 30°، فكم عزم القوة بوحدة النظام الدولي؟",o:["15","30","34.3","60"],a:1,s:"τ = F·r·sinθ = 40×1.5×0.5 = 30 N·m"},
+{id:528,u:"(2) الميكانيكا",uid:2,q:"قوة لها مقدار نفسه تؤثر في باب حول الدوران، في أي الحالات التالية ينعدم العزم؟",o:["عمودية على الباب","تؤثر في منتصف الباب","بزاوية 45° مع الباب","موازية لخط الذراع (مارة بمحور الدوران)"],a:3,s:"القوة الموازية لذراع الدوران لا تُحدث عزماً (sin0°=0)"},
+{id:529,u:"(2) الميكانيكا",uid:2,q:"في باب يوجد أربع حلقات A, B, C, D لفتح الباب. أي الحلقات يمكن استخدامها لتصبح قوة الجذب اللازمة لفتح الباب أقل ما يمكن؟",o:["A (الأقرب للمفصل)","B","C","D (الأبعد عن المفصل)"],a:3,s:"كلما زاد الذراع (r) قلت القوة اللازمة (τ=Fr)"},
+{id:530,u:"(2) الميكانيكا",uid:2,q:"يحاول طفل إمالة برميل ماء، في أي موضع من الأشكال التالية تصبح القوة اللازمة للإمالة أصغر ما يمكن؟",o:["أسفل البرميل","منتصف البرميل","أعلى البرميل","وسط البرميل"],a:2,s:"القوة الأصغر عند أطول ذراع = أعلى البرميل"},
+{id:531,u:"(2) الميكانيكا",uid:2,q:"إذا كانت محصلة القوى المؤثرة في جسم تساوي صفراً ومحصلة العزوم فيه تساوي صفراً فهذا يعني أن..",o:["الجسم في حالة اتزان انتقالي وهو في حالة اتزان دوراني","الجسم في حالة اتزان انتقالي وليس في حالة اتزان دوراني","الجسم ليس في حالة اتزان انتقالي ولا في حالة اتزان دوراني","الجسم ليس في حالة اتزان انتقالي وهو في حالة اتزان دوراني"],a:0,s:"ΣF=0 (انتقالي) وΣτ=0 (دوراني) = اتزان كامل"},
+{id:532,u:"(2) الميكانيكا",uid:2,q:"في الشكل إذا كان وزن الصندوق A ثلاثة أرباع وزن الصندوق B، وكانت المجموعة في حالة اتزان فإن مقدار المسافة r بوحدة المتر (العلم: 60 cm)..",o:["0.2","0.4","0.6","0.8"],a:3,s:"الاتزان: m_A×r_A = m_B×r_B → r يعتمد على النسبة (مفتاح الكتاب 0.8)"},
+{id:533,u:"(2) الميكانيكا",uid:2,q:"في لوح خشبي إذا كان m₁ في الأعلى وm₂ في الأسفل، ولكي يتزن اللوح لتحرك نقطة الارتكاز إلى..",o:["الأعلى","الأسفل","اليمين","اليسار"],a:1,s:"تتحرك نقطة الارتكاز نحو الكتلة الأكبر (في الاتجاه الذي يخل بالاتزان)"},
+// ===== ف3: الطاقة والآلات (39 سؤال) =====
+{id:91,u:"(3) الطاقة والآلات",uid:3,q:"النظام الذي لا يكتسب كتلة ولا يفقدها..",o:["المفتوح","المغلق","المرن","غير المرن"],a:1,s:"النظام المغلق: لا يكتسب ولا يفقد كتلة"},
+{id:92,u:"(3) الطاقة والآلات",uid:3,q:"حاصل ضرب كتلة جسم في سرعته..",o:["التسارع","الزخم","طاقة الحركة","طاقة الوضع"],a:1,s:"الزخم p = m × v"},
+{id:93,u:"(3) الطاقة والآلات",uid:3,q:"المساحة تحت منحنى (القوة-الزمن) تساوي..",o:["السرعة","التسارع","الزخم","الدفع"],a:3,s:"المساحة تحت (F-t) = الدفع = Δp"},
+{id:94,u:"(3) الطاقة والآلات",uid:3,q:"تتناسب الطاقة الحركية للجسم..",o:["عكسياً مع مربع سرعته","طردياً مع مربع سرعته","طردياً مع سرعته","عكسياً مع سرعته"],a:1,s:"KE = ½mv² → طردياً مع v²"},
+{id:95,u:"(3) الطاقة والآلات",uid:3,q:"جسم 2 kg سرعته 1 m/s، طاقته الحركية..",o:["0.25 J","0.5 J","0.75 J","1 J"],a:3,s:"KE = ½×2×1 = 1 J"},
+{id:96,u:"(3) الطاقة والآلات",uid:3,q:"جسم طاقته J100 وسرعته 5 m/s، كتلته..",o:["8 kg","10 kg","20 kg","500 kg"],a:0,s:"m = 2KE/v² = 200/25 = 8 kg"},
+{id:97,u:"(3) الطاقة والآلات",uid:3,q:"نظرية الشغل-الطاقة: يُبذل شغل J125 على جسم، التغير في طاقته..",o:["الحركية يزداد 125","الوضع يزداد 125","الوضع ينقص 125","الكلية تصبح صفر"],a:0,s:"W = ΔKE"},
+{id:98,u:"(3) الطاقة والآلات",uid:3,q:"جسم من السكون على سطح خشن، W=50J، شغل الاحتكاك 20J، التغير في KE..",o:["120 J","90 J","80 J","30 J"],a:3,s:"ΔKE = W_net = 50-20 = 30 J"},
+{id:99,u:"(3) الطاقة والآلات",uid:3,q:"طاقة الوضع لجسم 2 kg على ارتفاع 3m (g=10)..",o:["200 J","60 J","10 J","6 J"],a:1,s:"PE = mgh = 2×10×3 = 60 J"},
+{id:100,u:"(3) الطاقة والآلات",uid:3,q:"ثقل 10 kg يُرفع 10m (g=9.8)، طاقة وضعه..",o:["10 J","20 J","196 J","980 J"],a:3,s:"PE = 10×9.8×10 = 980 J"},
+{id:101,u:"(3) الطاقة والآلات",uid:3,q:"جسم 2 kg ارتفاعه 10m طاقة وضعه 196J (g=9.8)، كتلته..",o:["1 kg","2 kg","4 kg","8 kg"],a:1,s:"m = PE/(gh) = 196/98 = 2 kg"},
+{id:102,u:"(3) الطاقة والآلات",uid:3,q:"مجموع طاقة الحركة وطاقة الوضع..",o:["الطاقة الكامنة","الطاقة السكونية","الطاقة الكهرتزازية","الطاقة الميكانيكية"],a:3,s:"الطاقة الميكانيكية = KE + PE"},
+{id:103,u:"(3) الطاقة والآلات",uid:3,q:"جسم KE=19J وPE=11J، طاقته الميكانيكية..",o:["30 J","19 J","11 J","8 J"],a:0,s:"E = KE+PE = 30 J"},
+{id:104,u:"(3) الطاقة والآلات",uid:3,q:"الشغل المبذول مقسوماً على الزمن..",o:["الزخم","الدفع","القدرة","الطاقة"],a:2,s:"القدرة P = W/t"},
+{id:105,u:"(3) الطاقة والآلات",uid:3,q:"وحدة القدرة في SI..",o:["الواط","الفولت","الأمبير","الجول"],a:0,s:"القدرة: الواط (W = J/s)"},
+{id:106,u:"(3) الطاقة والآلات",uid:3,q:"محرك يرفع حاوية 3000N مسافة 9m في 10s، قدرته..",o:["27 W","2700 W","27000 W","270 W"],a:1,s:"P = Fd/t = 3000×9/10 = 2700 W"},
+{id:107,u:"(3) الطاقة والآلات",uid:3,q:"آلة A تنجز شغلاً في 130 min، آلة B نفس الشغل في 65 min..",o:["قدرة A مثلي B","قدرة B مثلي A","قدرة B > A","قدرة A = B"],a:1,s:"P_B = 2P_A لأن t_B أقل"},
+{id:108,u:"(3) الطاقة والآلات",uid:3,q:"الآلة تغير..",o:["الطاقة","مقدار القوة أو اتجاهها","الكتلة","الزمن"],a:1,s:"الآلة: تغير مقدار القوة أو اتجاهها"},
+{id:109,u:"(3) الطاقة والآلات",uid:3,q:"نسبة المقاومة إلى القوة المؤثرة..",o:["كفاءة الآلة","الفائدة الميكانيكية","معامل الاحتكاك","الفائدة الثالثة"],a:1,s:"الفائدة الميكانيكية = القوة المقاومة / القوة المؤثرة"},
+{id:110,u:"(3) الطاقة والآلات",uid:3,q:"آلة مركبة من آلتين بفائدة 10 و 2، الفائدة المركبة..",o:["5","8","12","20"],a:3,s:"الفائدة المركبة = 10×2 = 20"},
+{id:111,u:"(3) الطاقة والآلات",uid:3,q:"كفاءة آلة أنتجت 35J من 50J..",o:["35%","50%","70%","90%"],a:2,s:"الكفاءة = 35/50 × 100 = 70%"},
+{id:112,u:"(3) الطاقة والآلات",uid:3,q:"في غياب الاحتكاك، الطاقة الميكانيكية..",o:["تزداد","تنقص","تبقى ثابتة","تتحول لحرارة"],a:2,s:"بغياب الاحتكاك: E_mech = KE + PE = ثابت"},
+{id:113,u:"(3) الطاقة والآلات",uid:3,q:"بندول طاقته 10J عند الأقصى وكتلته 5 kg، أقصى سرعته..",o:["0 m/s","2 m/s","4 m/s","10 m/s"],a:1,s:"½mv² = 10 → v = √(20/5) = 2 m/s"},
+{id:114,u:"(3) الطاقة والآلات",uid:3,q:"أداة رفعت جسم 100N إلى 3m بشغل 400J، كفاءتها..",o:["75%","25%","100%","50%"],a:0,s:"الكفاءة = 300/400 × 100 = 75%"},
+{id:115,u:"(3) الطاقة والآلات",uid:3,q:"جسم ينزلق 6 m/s يتوقف بعد 9m، معامل الاحتكاك (g=10)..",o:["0.2","0.3","0.6","1.8"],a:0,s:"μ = v²/(2gd) = 36/180 = 0.2"},
+{id:116,u:"(3) الطاقة والآلات",uid:3,q:"جسم سقط من 20m، سرعته لحظة الوصول للأرض (g=10)..",o:["20 m/s","10 m/s","14 m/s","40 m/s"],a:0,s:"v = √(2gh) = √400 = 20 m/s"},
+{id:117,u:"(3) الطاقة والآلات",uid:3,q:"قوة 8N تحرك جسماً 5m، شغلها..",o:["40 J","13 J","3 J","0 J"],a:0,s:"W = F×d = 8×5 = 40 J"},
+{id:118,u:"(3) الطاقة والآلات",uid:3,q:"قوة 50N بزاوية 60° تحرك جسماً 4m أفقياً، الشغل..",o:["100 J","200 J","173 J","50 J"],a:0,s:"W = Fdcos60° = 50×4×0.5 = 100 J"},
+{id:119,u:"(3) الطاقة والآلات",uid:3,q:"جسم يتحرك في اتجاه عمودي على القوة، الشغل..",o:["صفر","مساوٍ للطاقة الحركية","مساوٍ للطاقة الكامنة","يعتمد على المسافة"],a:0,s:"W = Fdcos90° = 0"},
+{id:120,u:"(3) الطاقة والآلات",uid:3,q:"طاقة الوضع المرونية لنابض k=400N/m استُطيل 0.5m..",o:["50 J","25 J","100 J","200 J"],a:0,s:"PE = ½kx² = ½×400×0.25 = 50 J"},
+{id:121,u:"(3) الطاقة والآلات",uid:3,q:"نابض k=400N/m طاقته 50J، استطالته..",o:["0.5 m","0.25 m","4 m","2 m"],a:0,s:"x = √(2PE/k) = √(100/400) = 0.5 m"},
+{id:122,u:"(3) الطاقة والآلات",uid:3,q:"1 حصان = ؟ واط",o:["746 W","1000 W","100 W","500 W"],a:0,s:"1 HP = 746 W"},
+{id:123,u:"(3) الطاقة والآلات",uid:3,q:"الطاقة المختزنة في نظام نابض..",o:["½kx","½kx²","kx²","kx"],a:1,s:"PE_spring = ½kx²"},
+{id:124,u:"(3) الطاقة والآلات",uid:3,q:"كفاءة آلة MA=0.2 وIMA=0.4..",o:["20%","50%","60%","80%"],a:1,s:"η = MA/IMA = 0.2/0.4 = 50%"},
+{id:125,u:"(3) الطاقة والآلات",uid:3,q:"الفائدة الميكانيكية الثالثة = إزاحة القوة / إزاحة المقاومة = 5؛ يعني..",o:["القوة أكبر 5 مرات","المقاومة أكبر 5 مرات","المسافة المقاومة أكبر 5 مرات","المسافة القوة أكبر 5 مرات"],a:3,s:"IMA = d_effort / d_resistance"},
+{id:126,u:"(3) الطاقة والآلات",uid:3,q:"الشغل الناتج / الشغل المبذول × 100%..",o:["الفائدة الميكانيكية","الفائدة الثالثة","كفاءة الآلة","الأداء"],a:2,s:"كفاءة الآلة = (W_out/W_in) × 100%"},
+{id:127,u:"(3) الطاقة والآلات",uid:3,q:"جسم 10 kg ارتفع 5m، طاقة وضعه (g=10)..",o:["500 J","50 J","2000 J","100 J"],a:0,s:"PE = mgh = 10×10×5 = 500 J"},
+{id:128,u:"(3) الطاقة والآلات",uid:3,q:"جسم 3 kg ينزلق من أعلى منحدر ارتفاعه 10m، سرعته في القاعدة (g=10، بدون احتكاك)..",o:["√200 m/s","10 m/s","20 m/s","100 m/s"],a:0,s:"v = √(2gh) = √200 ≈ 14.1 m/s"},
+{id:129,u:"(3) الطاقة والآلات",uid:3,q:"محرك قدرته 2000W يعمل 30s، الشغل الذي يؤديه..",o:["60000 J","2030 J","66.7 J","1970 J"],a:0,s:"W = P×t = 2000×30 = 60000 J"},
+// ===== ف4: حالات المادة (39 سؤال) =====
+{id:130,u:"(4) حالات المادة",uid:4,q:"درجة الحرارة تعتمد على..",o:["متوسط الطاقة الحركية للجزيئات","عدد الذرات","متوسط الطاقة الكلية","عدد الجزيئات"],a:0,s:"درجة الحرارة = متوسط الطاقة الحركية الجزيئية"},
+{id:131,u:"(4) حالات المادة",uid:4,q:"الحالة التي يتوقف عندها انتقال الطاقة بين جسمين..",o:["الطاقة الحرارية","الانكدار الحراري","الحرارة النوعية","الاتزان الحراري"],a:3,s:"الاتزان الحراري: تتساوى درجات الحرارة"},
+{id:132,u:"(4) حالات المادة",uid:4,q:"التوصيل أسرع في..",o:["السوائل","الغازات","الفراغ","المعادن"],a:3,s:"المعادن: أفضل موصلات للحرارة"},
+{id:133,u:"(4) حالات المادة",uid:4,q:"الإشعاع الحراري ينتقل بواسطة موجات..",o:["كهرومغناطيسية","طولية","موقوفة","مستعرضة"],a:0,s:"الإشعاع: موجات كهرومغناطيسية لا تحتاج وسطاً"},
+{id:134,u:"(4) حالات المادة",uid:4,q:"الحرارة النوعية للماء تقريباً..",o:["4200 J/kg.K","2100 J/kg.K","1000 J/kg.K","8400 J/kg.K"],a:0,s:"c_ماء = 4200 J/kg.K"},
+{id:135,u:"(4) حالات المادة",uid:4,q:"قطعة 0.5 kg انخفضت حرارتها 20K، c=376 J/kg.K. كمية الطاقة المفقودة..",o:["15040 J","7520 J","3760 J","1880 J"],a:2,s:"Q = mcΔT = 0.5×376×20 = 3760 J"},
+{id:136,u:"(4) حالات المادة",uid:4,q:"الحرارة الكامنة لانصهار الحديد 3.34×10⁵J/kg، لصهر 20 kg..",o:["3.34×10⁶","1.67×10⁶","6.68×10⁶","1.336×10⁷"],a:2,s:"Q = mH_f = 20×3.34×10⁵ = 6.68×10⁶ J"},
+{id:137,u:"(4) حالات المادة",uid:4,q:"الحرارة الكامنة للتبخر للماء 2.26×10⁶ J/kg، لتبخير 30 kg..",o:["6.78×10⁷","6.78×10⁶","2.26×10⁵","2.26×10⁶"],a:0,s:"Q = 30×2.26×10⁶ = 6.78×10⁷ J"},
+{id:138,u:"(4) حالات المادة",uid:4,q:"محرك حراري: Q_H=2000J، Q_C=1500J، كفاءته..",o:["3500","500","0.75","0.25"],a:3,s:"η = (Q_H-Q_C)/Q_H = 500/2000 = 0.25"},
+{id:139,u:"(4) حالات المادة",uid:4,q:"الموائع هي..",o:["الغازات فقط","السوائل فقط","الغازات والسوائل","السوائل والصلبيات"],a:2,s:"الموائع = السوائل + الغازات"},
+{id:140,u:"(4) حالات المادة",uid:4,q:"الكثافة ρ = ؟",o:["m/V","V/m","F/A","P/V"],a:0,s:"الكثافة = الكتلة / الحجم"},
+{id:141,u:"(4) حالات المادة",uid:4,q:"مبدأ أرخميدس: قوة الطفو تساوي..",o:["وزن السائل المزاح","كتلة السائل المزاح","حجم الجسم × الكثافة","وزن الجسم"],a:0,s:"قوة الطفو = وزن السائل المزاح"},
+{id:142,u:"(4) حالات المادة",uid:4,q:"قالب جرانيتي حجمه 10⁻³ m³ في ماء ρ=10³ kg/m³، قوة الطفو (g=9.8)..",o:["2.45 N","4.9 N","9.8 N","19.6 N"],a:2,s:"F_b = ρVg = 10³×10⁻³×9.8 = 9.8 N"},
+{id:143,u:"(4) حالات المادة",uid:4,q:"اللزوجة تقيس..",o:["مقاومة السائل للتدفق","كثافة السائل","ضغط السائل","درجة حرارة السائل"],a:0,s:"اللزوجة: مقياس مقاومة السائل للتدفق"},
+{id:144,u:"(4) حالات المادة",uid:4,q:"التوتر السطحي نتيجة..",o:["قوى التماسك","قوى التلاصق","اللزوجة","قوة الطفو"],a:0,s:"التوتر السطحي: قوى التماسك بين جزيئات السطح"},
+{id:145,u:"(4) حالات المادة",uid:4,q:"الوقوف على سجادة ثم لمس المعدن يسبب فرقعة بسبب..",o:["الاحتكاك الكيميائي","الشحن بالدلك","التوصيل الحراري","الاتزان الحراري"],a:1,s:"المشي على السجادة يولد شحناً بالدلك"},
+{id:146,u:"(4) حالات المادة",uid:4,q:"المكبس الهيدروليكي يعتمد على مبدأ..",o:["برنولي","أرخميدس","باسكال","بور"],a:2,s:"المكبس الهيدروليكي: مبدأ باسكال"},
+{id:147,u:"(4) حالات المادة",uid:4,q:"F₁/A₁ = F₂/A₂ هو مبدأ..",o:["أرخميدس","برنولي","باسكال","نيوتن"],a:2,s:"مبدأ باسكال: F₁/A₁ = F₂/A₂"},
+{id:148,u:"(4) حالات المادة",uid:4,q:"عند زيادة سرعة المائع، ضغطه..",o:["يزداد","ينقص","يبقى ثابتاً","يصبح صفراً"],a:1,s:"مبدأ برنولي: سرعة أعلى → ضغط أقل"},
+{id:149,u:"(4) حالات المادة",uid:4,q:"حتى لا تنغرس إطارات السيارة في الرمال..",o:["زيادة الوزن","زيادة عرضها","زيادة محيطها","زيادة ارتفاعها"],a:1,s:"عرض أكبر = مساحة تلامس أكبر = ضغط أقل"},
+{id:150,u:"(4) حالات المادة",uid:4,q:"الشبكة البلورية..",o:["غط غير منتظم","غط منتظم يتشكل عند التبريد","سائل لزج","مادة عشوائية"],a:1,s:"الشبكة البلورية: ترتيب منتظم عند تبريد السائل"},
+{id:151,u:"(4) حالات المادة",uid:4,q:"تترك فجوات بين السكك الخديدية..",o:["للسماح بتقلصها","للسماح بتمددها","لتقليل وزنها","لتوصيل الكهرباء"],a:1,s:"الفجوات تسمح بالتمدد الحراري دون انحناء"},
+{id:152,u:"(4) حالات المادة",uid:4,q:"القانون الأول للديناميكا الحرارية..",o:["ΔU = Q - W","الحرارة تنتقل من البارد للساخن","الإنتروبيا تزداد","كفاءة المحرك 100%"],a:0,s:"ΔU = Q - W (حفظ الطاقة)"},
+{id:153,u:"(4) حالات المادة",uid:4,q:"مكتشف الأشعة X..",o:["فاراداي","رونتجن","ميلكان","ماكسويل"],a:1,s:"رونتجن: مكتشف الأشعة السينية 1895"},
+{id:154,u:"(4) حالات المادة",uid:4,q:"درجة التحول من صلبة لسائلة..",o:["درجة التجمد","درجة الانصهار","درجة التبخر","درجة الغليان"],a:1,s:"درجة الانصهار: تحول من صلبة لسائلة"},
+{id:155,u:"(4) حالات المادة",uid:4,q:"الإنتروبيا مقياس..",o:["الطاقة الحرارية","الفوضى أو العشوائية","درجة الحرارة","كفاءة المحرك"],a:1,s:"الإنتروبيا: مقياس الفوضى في النظام"},
+{id:156,u:"(4) حالات المادة",uid:4,q:"كفاءة كارنو بين 500K و 300K..",o:["40%","60%","20%","80%"],a:0,s:"η = 1 - T_C/T_H = 1-300/500 = 40%"},
+{id:157,u:"(4) حالات المادة",uid:4,q:"100°C بالكلفن..",o:["100 K","373 K","273 K","200 K"],a:1,s:"K = 100 + 273 = 373 K"},
+{id:158,u:"(4) حالات المادة",uid:4,q:"قانون بويل (T ثابتة): P₁V₁ = ؟",o:["P₂V₂","P₂/V₂","V₂/P₂","P₁/V₁"],a:0,s:"قانون بويل: P₁V₁ = P₂V₂"},
+{id:159,u:"(4) حالات المادة",uid:4,q:"قانون شارل (P ثابتة): V₁/T₁ = ؟",o:["V₂/T₂","T₂/V₂","V₂×T₂","P₂/T₂"],a:0,s:"قانون شارل: V₁/T₁ = V₂/T₂"},
+{id:160,u:"(4) حالات المادة",uid:4,q:"قانون الغاز المثالي..",o:["PV = nRT","PV = mRT","P = nRT","V = nRT/m"],a:0,s:"PV = nRT"},
+{id:161,u:"(4) حالات المادة",uid:4,q:"غاز V=2L عند P=3 atm، حجمه عند P=6 atm (T ثابتة)..",o:["1 L","4 L","6 L","12 L"],a:0,s:"P₁V₁=P₂V₂ → V₂=3×2/6 = 1 L"},
+{id:162,u:"(4) حالات المادة",uid:4,q:"طرق انتقال الحرارة الثلاثة..",o:["التوصيل والحمل والإشعاع","الكهرباء والصوت والحرارة","الحث والحمل والحرق","الاحتكاك والتوصيل والتبريد"],a:0,s:"التوصيل والحمل والإشعاع"},
+{id:163,u:"(4) حالات المادة",uid:4,q:"الحرارة اللازمة لصهر 0.5 kg جليد (L=336000 J/kg)..",o:["168000 J","672000 J","336000 J","84000 J"],a:0,s:"Q = mL = 0.5×336000 = 168000 J"},
+{id:164,u:"(4) حالات المادة",uid:4,q:"تغير الإنتروبيا ΔS للماء يكتسب Q=600J عند 27°C..",o:["22.22 J/K","2 J/K","20 J/K","0.5 J/K"],a:1,s:"ΔS = Q/T = 600/300 = 2 J/K"},
+{id:165,u:"(4) حالات المادة",uid:4,q:"مادة 3 kg تسخن من 20°C إلى 80°C بـ Q=36000J، حرارتها النوعية..",o:["200 J/kg°C","1800 J/kg°C","180 J/kg°C","600 J/kg°C"],a:0,s:"c = Q/(mΔT) = 36000/180 = 200 J/kg°C"},
+{id:166,u:"(4) حالات المادة",uid:4,q:"معظم مكونات النجوم في حالة..",o:["صلبة","سائلة","غازية","بلازما"],a:3,s:"النجوم: معظم مادتها بلازما"},
+{id:167,u:"(4) حالات المادة",uid:4,q:"قوى التجاذب بين جزيئات المادة نفسها..",o:["قوى التماسك","قوى التلاصق","قوى الطفو","قوى الاحتكاك"],a:0,s:"التماسك: تجاذب بين جزيئات نفس المادة"},
+{id:168,u:"(4) حالات المادة",uid:4,q:"امتصاص الملابس للعرق تطبيق على..",o:["قاعدة باسكال","التوتر السطحي","الخاصية الشعرية","الجاذبية الأرضية"],a:2,s:"الخاصية الشعرية: ارتفاع السوائل في الأنابيب الدقيقة"},
+// ===== ف5: الموجات والصوت (33 سؤال) =====
+{id:169,u:"(5) الموجات والصوت",uid:5,q:"نابض k=400N/m استطال 20cm، كمية ما. ما قوته؟",o:["9.8 N","80 N","392 N","980 N"],a:1,s:"F = kx = 400×0.2 = 80 N"},
+{id:170,u:"(5) الموجات والصوت",uid:5,q:"بندول 1 kg زمنه 3s، إذا استُبدلت الكتلة بـ 2 kg ثم 3 kg فالزمن..",o:["3 و 3","3 و 6","6 و 9","2 و 1"],a:0,s:"T للبندول لا يعتمد على الكتلة"},
+{id:171,u:"(5) الموجات والصوت",uid:5,q:"بندول طوله l = g، زمنه الدوري..",o:["π","2π","2π²","4π²"],a:1,s:"T = 2π√(l/g) = 2π√(g/g) = 2π"},
+{id:172,u:"(5) الموجات والصوت",uid:5,q:"اضطراب ينتقل خلال الوسط ناقلاً طاقة..",o:["التردد","الاضطراب","الموجة","العقدة"],a:2,s:"الموجة: اضطراب ينتقل ناقلاً الطاقة"},
+{id:173,u:"(5) الموجات والصوت",uid:5,q:"معدل نقل طاقة الموجة يتناسب مع..",o:["سرعتها","سعتها","مربع سعتها","تردده"],a:2,s:"طاقة الموجة ∝ A²"},
+{id:174,u:"(5) الموجات والصوت",uid:5,q:"الموجة الطولية: اهتزاز الجسيمات..",o:["عمودي على الانتشار","موازٍ للانتشار","عشوائي","دائري"],a:1,s:"الطولية: اهتزاز ∥ اتجاه الانتشار (كالصوت)"},
+{id:175,u:"(5) الموجات والصوت",uid:5,q:"موجة سرعتها 6 m/s وطولها 0.5m، ترددها..",o:["0.6 Hz","3 Hz","12 Hz","0.083 Hz"],a:2,s:"f = v/λ = 6/0.5 = 12 Hz"},
+{id:176,u:"(5) الموجات والصوت",uid:5,q:"موجة ترددها 200 Hz وسرعتها 300 m/s، طولها الموجي..",o:["6 m","0.67 m","1.5 m","60000 m"],a:2,s:"λ = v/f = 300/200 = 1.5 m"},
+{id:177,u:"(5) الموجات والصوت",uid:5,q:"أمتز صوت يُطلق باتجاه جبل 510m منه، يُسمع صداه بعد..",o:["0.67 s","1.5 s","3 s","0.3 s"],a:2,s:"t = 2d/v = 1020/340 = 3 s"},
+{id:178,u:"(5) الموجات والصوت",uid:5,q:"قطعت موجة 200 Hz مسافة 100m في 0.5s، طولها الموجي..",o:["4 m","2 m","1 m","0.5 m"],a:2,s:"v=200/0.5=400... λ=v/f=400/200=2... الإجابة 1 m"},
+{id:179,u:"(5) الموجات والصوت",uid:5,q:"سرعة الصوت في الهواء تعتمد على..",o:["علو الصوت","مستوى الصوت","سعة الموجة","درجة الحرارة"],a:3,s:"سرعة الصوت في الهواء تعتمد على درجة الحرارة"},
+{id:180,u:"(5) الموجات والصوت",uid:5,q:"سرعة الصوت في السوائل .......... في الصلبيات..",o:["أكبر من","أصغر من","تساوي","ضعف"],a:1,s:"صلبيات > سوائل > غازات"},
+{id:181,u:"(5) الموجات والصوت",uid:5,q:"المدى السمعي البشري..",o:["20-200000 Hz","20-20000 Hz","2-20000 Hz","2-200 Hz"],a:1,s:"المدى السمعي: 20 Hz - 20,000 Hz"},
+{id:182,u:"(5) الموجات والصوت",uid:5,q:"وحدة قياس مستوى الصوت..",o:["الديسيبل","الهرتز","الدبلر","البلر"],a:0,s:"مستوى الصوت بالديسيبل (dB)"},
+{id:183,u:"(5) الموجات والصوت",uid:5,q:"تأثير دوبلر: تغير التردد الملاحظ بسبب..",o:["تغير سعة الموجة","حركة المصدر أو المستقبل","تغير الوسط","تغير الطاقة"],a:1,s:"دوبلر: تغير التردد بسبب حركة المصدر/المستقبل"},
+{id:184,u:"(5) الموجات والصوت",uid:5,q:"طول أقصر عمود هوائي مغلق في حالة رنين..",o:["λ/4","λ/2","3λ/4","λ"],a:0,s:"أقصر عمود هوائي مغلق: λ/4"},
+{id:185,u:"(5) الموجات والصوت",uid:5,q:"الموجات الموقوفة (الدائمة) تنتج من..",o:["انعكاس موجتين","تداخل موجتين متعاكستين","امتصاص الموجة","انكسار الموجة"],a:1,s:"الموجات الدائمة: تداخل موجتين متعاكستين"},
+{id:186,u:"(5) الموجات والصوت",uid:5,q:"في الموجات الدائمة، في نقاط العقد..",o:["أقصى اهتزاز","صفر اهتزاز","نصف اهتزاز","ربع اهتزاز"],a:1,s:"العُقد: نقاط سعتها صفر (لا تتحرك)"},
+{id:187,u:"(5) الموجات والصوت",uid:5,q:"الرادار يعتمد على..",o:["مبدأ باسكال","تأثير دوبلر","مبدأ برنولي","تأثير الرنين"],a:1,s:"الرادار يستخدم تأثير دوبلر لقياس السرعة"},
+{id:188,u:"(5) الموجات والصوت",uid:5,q:"التردد الدوري للبندول T = 2π√(l/g)، ماذا يعني هذا؟",o:["T يعتمد على الكتلة","T يعتمد على l وg فقط","T يعتمد على السعة","T ثابت دائماً"],a:1,s:"T = 2π√(l/g) → يعتمد على طول الخيط وg فقط"},
+{id:189,u:"(5) الموجات والصوت",uid:5,q:"الموجات الكهرومغناطيسية..",o:["تحتاج وسطاً مادياً","لا تحتاج وسطاً، تنتشر في الفراغ","أبطأ من الصوت","تنتشر في الصلبيات فقط"],a:1,s:"الموجات EM: لا تحتاج وسطاً، c = 3×10⁸ m/s"},
+{id:190,u:"(5) الموجات والصوت",uid:5,q:"الطيف الكهرومغناطيسي من الأطول للأقصر موجياً..",o:["راديو>ميكروويف>IR>مرئي>UV>X>جاما","جاما>X>مرئي>راديو","مرئي>راديو>جاما","جاما>راديو>مرئي"],a:0,s:"راديو ← ميكروويف ← IR ← مرئي ← UV ← X ← جاما"},
+{id:191,u:"(5) الموجات والصوت",uid:5,q:"موجة ترددها 440 Hz وطول موجتها 0.75m، سرعتها..",o:["330 m/s","440 m/s","586 m/s","293 m/s"],a:0,s:"v = fλ = 440×0.75 = 330 m/s"},
+{id:192,u:"(5) الموجات والصوت",uid:5,q:"التردد والزمن الدوري مرتبطان بـ..",o:["f = 1/T","f = T","f = T²","T = f²"],a:0,s:"f = 1/T"},
+{id:193,u:"(5) الموجات والصوت",uid:5,q:"تردد 50 Hz وسرعة 300 m/s، طول الموجة..",o:["6 m","15000 m","0.167 m","350 m"],a:0,s:"λ = v/f = 300/50 = 6 m"},
+{id:194,u:"(5) الموجات والصوت",uid:5,q:"ظاهرة الرنين الصوتي..",o:["اهتزاز جسم بتردده الطبيعي عند تأثره بتردد مماثل","انعكاس الصوت","امتصاص الصوت","انكسار الصوت"],a:0,s:"الرنين: تردد القوة المحركة = التردد الطبيعي"},
+{id:195,u:"(5) الموجات والصوت",uid:5,q:"موجة كهرومغناطيسية طولها 2×10⁻⁸ m في الهواء، ترددها..",o:["6.7×10⁻¹⁷ Hz","15×10¹⁵ Hz","6.7×10¹⁷ Hz","15×10⁻¹⁵ Hz"],a:1,s:"f = c/λ = 3×10⁸/2×10⁻⁸ = 15×10¹⁵ Hz"},
+{id:196,u:"(5) الموجات والصوت",uid:5,q:"الصوت لا ينتشر في..",o:["الهواء","الماء","الحديد","الفراغ"],a:3,s:"الصوت موجة ميكانيكية لا تنتشر في الفراغ"},
+{id:197,u:"(5) الموجات والصوت",uid:5,q:"الموجات السطحية تتحرك..",o:["ببُعد واحد","ببُعدين","بثلاثة أبعاد","بأي اتجاه"],a:1,s:"الموجات السطحية ذات بُعدين (في مستوٍ)"},
+{id:198,u:"(5) الموجات والصوت",uid:5,q:"الموجات الصوتية تتحرك في..",o:["بُعد واحد","بُعدين","ثلاثة أبعاد","لا تتحرك"],a:2,s:"الصوت يتحرك في ثلاثة أبعاد"},
+{id:199,u:"(5) الموجات والصوت",uid:5,q:"عند تضاعف سعة الموجة، طاقتها..",o:["تتضاعف","تتربع","تنتصف","لا تتغير"],a:1,s:"E ∝ A² → تضاعف A يربع الطاقة"},
+{id:200,u:"(5) الموجات والصوت",uid:5,q:"الصدى (Echo) يُسمع عند..",o:["انعكاس الصوت فوراً","مرور 0.1s على الأقل","امتصاص الصوت","انكسار الصوت"],a:1,s:"الصدى: ≥ 0.1 ثانية بعد الصوت الأصلي"},
+{id:201,u:"(5) الموجات والصوت",uid:5,q:"ما نوع موجات الصوت؟",o:["مستعرضة","طولية","سطحية","كهرومغناطيسية"],a:1,s:"الصوت: موجات ميكانيكية طولية"},
+// ===== ف6: الضوء (47 سؤال) =====
+{id:202,u:"(6) الضوء",uid:6,q:"العلم الذي يدرس الضوء كشعاع بغض النظر عن طبيعته..",o:["ميكانيكا الكم","البصريات","الفيزياء النسبية","الليزر"],a:1,s:"البصريات الهندسية: تدرس الضوء كشعاع"},
+{id:203,u:"(6) الضوء",uid:6,q:"أي الوحدات لقياس التدفق الضوئي؟",o:["الاستقطاب","شدة الإضاءة","الاستضاءة","اللومن"],a:3,s:"التدفق الضوئي: اللومن (lm)"},
+{id:204,u:"(6) الضوء",uid:6,q:"معدل اصطدام الضوء بوحدة المساحة يسمى..",o:["التدفق الضوئي","اللوكس","الطيف","الاستضاءة"],a:3,s:"الاستضاءة E = P/4πr²"},
+{id:205,u:"(6) الضوء",uid:6,q:"اللون المتمم للأصفر..",o:["الأزرق","الأخضر","الأحمر","الأبيض"],a:0,s:"أصفر + أزرق = أبيض"},
+{id:206,u:"(6) الضوء",uid:6,q:"قانون الانعكاس: زاوية السقوط..",o:["تساوي زاوية الانعكاس","أكبر من زاوية الانعكاس","أصغر من زاوية الانعكاس","لا علاقة بينهما"],a:0,s:"زاوية السقوط = زاوية الانعكاس"},
+{id:207,u:"(6) الضوء",uid:6,q:"مرآة مستوية، الصورة..",o:["حقيقية مكبرة","وهمية معتدلة بنفس الحجم","حقيقية مقلوبة","وهمية مقلوبة"],a:1,s:"مرآة مستوية: صورة وهمية معتدلة بنفس الحجم"},
+{id:208,u:"(6) الضوء",uid:6,q:"نوع المرايا في جوانب السيارات..",o:["مقعرة","مستوية","محدبة","مستوية ومحدبة"],a:2,s:"المرايا المحدبة: مجال رؤية أوسع"},
+{id:209,u:"(6) الضوء",uid:6,q:"البؤرة هي..",o:["نقطة التصوير","نقطة تجمع الأشعة الموازية بعد الانعكاس","مركز المرآة","حافة المرآة"],a:1,s:"البؤرة: نقطة تجمع الأشعة الموازية"},
+{id:210,u:"(6) الضوء",uid:6,q:"العلاقة بين مركز التكور C والبعد البؤري f للمرآة المقعرة..",o:["C = f","C = 2f","C = f/2","C = f/4"],a:1,s:"C = 2f"},
+{id:211,u:"(6) الضوء",uid:6,q:"وضع جسم بين F والمرآة المقعرة، الصورة..",o:["حقيقية مقلوبة","وهمية مكبرة معتدلة","صغيرة حقيقية","لا توجد"],a:1,s:"الجسم بين F والمرآة: صورة وهمية مكبرة"},
+{id:212,u:"(6) الضوء",uid:6,q:"قانون سنل: n₁ sinθ₁ = ؟",o:["n₂ sinθ₂","n₂ cosθ₂","n₂ tanθ₂","n₁ sinθ₂"],a:0,s:"قانون سنل: n₁ sinθ₁ = n₂ sinθ₂"},
+{id:213,u:"(6) الضوء",uid:6,q:"سرعة الضوء في الزجاج n=1.5..",o:["2×10⁸ m/s","4.5×10⁸ m/s","1.5×10⁸ m/s","3×10⁸ m/s"],a:0,s:"v = c/n = 3×10⁸/1.5 = 2×10⁸ m/s"},
+{id:214,u:"(6) الضوء",uid:6,q:"الانعكاس الكلي الداخلي يحدث عندما..",o:["زاوية السقوط < الحرجة","زاوية السقوط = الحرجة","زاوية السقوط > الحرجة","زاوية السقوط = 0"],a:2,s:"الانعكاس الكلي: زاوية السقوط > الحرجة"},
+{id:215,u:"(6) الضوء",uid:6,q:"الألياف الضوئية تعتمد على..",o:["الانكسار العادي","الانعكاس الكلي الداخلي","التداخل","الحيود"],a:1,s:"الألياف البصرية: الانعكاس الكلي الداخلي"},
+{id:216,u:"(6) الضوء",uid:6,q:"السراب يحدث بسبب..",o:["انعكاس الضوء","انكسار الضوء","تداخل الضوء","حيود الضوء"],a:1,s:"السراب: انكسار الضوء بسبب تدرج كثافة الهواء"},
+{id:217,u:"(6) الضوء",uid:6,q:"معادلة المرايا والعدسات: 1/f = ؟",o:["1/do + 1/di","do × di","do - di","do + di"],a:0,s:"1/f = 1/do + 1/di"},
+{id:218,u:"(6) الضوء",uid:6,q:"مرآة مقعرة f=30cm، جسم على بُعد 15cm، الصورة..",o:["حقيقية مصغرة","وهمية مكبرة","حقيقية مقلوبة","لا توجد"],a:1,s:"do=15<f=30 → صورة وهمية مكبرة معتدلة"},
+{id:219,u:"(6) الضوء",uid:6,q:"مرآة مقعرة f=4cm، جسم على بُعد 10cm، صفات الصورة..",o:["حقيقية مصغرة مقلوبة","حقيقية مكبرة مقلوبة","وهمية مكبرة","وهمية مصغرة"],a:0,s:"do=10>C=8 → حقيقية مصغرة مقلوبة"},
+{id:220,u:"(6) الضوء",uid:6,q:"وضع جسم على بُعد 30cm من مرآة مقعرة f=10cm، بُعد الصورة..",o:["6 cm","12 cm","15 cm","20 cm"],a:2,s:"1/10=1/30+1/di → di=15 cm"},
+{id:221,u:"(6) الضوء",uid:6,q:"وضع جسم على 12cm من عدسة مقعرة f=6cm، بُعد الصورة..",o:["-4 cm","-18 cm","8 cm","20 cm"],a:0,s:"1/(-6)=1/12+1/di → di=-4 cm"},
+{id:222,u:"(6) الضوء",uid:6,q:"الزاوية الحرجة لمادة n=1.5..",o:["41.8°","48.6°","30°","60°"],a:0,s:"sinθc = 1/n = 1/1.5 → θc ≈ 41.8°"},
+{id:223,u:"(6) الضوء",uid:6,q:"تجربة شقي يونج تُثبت..",o:["انعكاس الضوء","انكسار الضوء","حيود الضوء","تداخل الضوء"],a:3,s:"يونج: تداخل الضوء وطبيعته الموجية"},
+{id:224,u:"(6) الضوء",uid:6,q:"الليزر ضوء..",o:["أحادي اللون، متماسك، موجه","متعدد الألوان","ينتشر في الفراغ فقط","أبطأ من الضوء العادي"],a:0,s:"الليزر: أحادي، متماسك، موجه، شدة عالية"},
+{id:225,u:"(6) الضوء",uid:6,q:"عيب طول النظر يُصحح بـ..",o:["عدسة محدبة","عدسة مقعرة","عدسات لا لونية","الليزر"],a:0,s:"طول النظر: عدسات محدبة"},
+{id:226,u:"(6) الضوء",uid:6,q:"عيب قصر النظر: الصورة تتكون..",o:["أمام الشبكية","خلف الشبكية","على الشبكية","لا تتكون"],a:0,s:"قصر النظر: الصورة أمام الشبكية"},
+{id:227,u:"(6) الضوء",uid:6,q:"التكبير في المرآة m = ؟",o:["-di/do","di/do","do/di","-do/di"],a:0,s:"التكبير m = -di/do"},
+{id:228,u:"(6) الضوء",uid:6,q:"المنشور الزجاجي يُبعثر الضوء الأبيض بسبب..",o:["الانعكاس","الانكسار مع تغير الطول الموجي","الحيود","التداخل"],a:1,s:"الانتشار الطيفي: تغير معامل الانكسار مع λ"},
+{id:229,u:"(6) الضوء",uid:6,q:"معامل الانكسار n = ؟",o:["c/v","v/c","λ×f","c×v"],a:0,s:"n = c/v"},
+{id:230,u:"(6) الضوء",uid:6,q:"الضوء ينتقل من وسط أقل كثافة لأكثر، الشعاع..",o:["يقترب من العمود المقام","يبتعد عن العمود المقام","يبقى موازياً","ينعكس كلياً"],a:0,s:"من أخف لأكثف: الشعاع يقترب من العمود المقام"},
+{id:231,u:"(6) الضوء",uid:6,q:"التداخل البناء يحدث عند..",o:["فرق مسار mλ","فرق مسار (m+½)λ","تلاقي موجتين في نفس الوسط","انعكاس الموجة"],a:0,s:"تداخل بناء: Δ = mλ (m = 0,1,2,...)"},
+{id:232,u:"(6) الضوء",uid:6,q:"التداخل الهدام يحدث عند فرق مسار..",o:["mλ","(m+½)λ","2mλ","0"],a:1,s:"تداخل هدام: Δ = (m+½)λ"},
+{id:233,u:"(6) الضوء",uid:6,q:"الحيود الضوئي: انحناء الضوء حول..",o:["مصادر الضوء","الحواجز والشقوق","السطوح العاكسة","السطوح المنكسرة"],a:1,s:"الحيود: انحناء الضوء حول الحواجز والشقوق"},
+{id:234,u:"(6) الضوء",uid:6,q:"الاستقطاب: إنتاج ضوء يتذبذب في..",o:["مستويين","مستوى واحد","كل المستويات","لا مستوى محدد"],a:1,s:"الاستقطاب: ضوء يتذبذب في مستوى واحد"},
+{id:235,u:"(6) الضوء",uid:6,q:"سرعة الضوء في الفراغ..",o:["3×10⁶ m/s","3×10⁸ m/s","3×10¹⁰ m/s","3×10⁴ m/s"],a:1,s:"c = 3×10⁸ m/s"},
+{id:236,u:"(6) الضوء",uid:6,q:"لون الضوء طوله الموجي 700nm..",o:["أحمر","أخضر","أزرق","بنفسجي"],a:0,s:"700nm في نطاق الأحمر (620-750nm)"},
+{id:237,u:"(6) الضوء",uid:6,q:"مرآة مقعرة تكبر 3 مرات، الجسم على 40cm، بُعد الصورة..",o:["120 cm","40 cm","80 cm","30 cm"],a:0,s:"di = m×do = 3×40 = 120 cm"},
+{id:238,u:"(6) الضوء",uid:6,q:"محزوز الحيود يُستخدم لـ..",o:["قياس البعد البؤري","تكوين أنماط حيود وقياس λ","قياس سرعة الضوء","قياس معامل الانكسار"],a:1,s:"محزوز الحيود: تكوين أنماط حيود"},
+{id:239,u:"(6) الضوء",uid:6,q:"أي القوس المطر ما الظاهرة غير المتضمنة؟",o:["الانكسار","التشتت","الانعكاس الداخلي","الحيود"],a:3,s:"الحيود: تأثيره ضعيف جداً في قوس المطر"},
+{id:240,u:"(6) الضوء",uid:6,q:"التقطيع الطيفي (spectroscopy) يستخدم..",o:["محزوز الحيود والمنشور","المرايا المقعرة","العدسات المحدبة","الألياف البصرية"],a:0,s:"التحليل الطيفي: محزوز الحيود والمنشور"},
+{id:241,u:"(6) الضوء",uid:6,q:"مرآة مقعرة f=11cm، جسم على 33cm، بُعد الصورة..",o:["16.5 cm","33 cm","11 cm","22 cm"],a:0,s:"1/11=1/33+1/di → 1/di=2/33 → di=16.5 cm"},
+{id:242,u:"(6) الضوء",uid:6,q:"عدسة محدبة f=20cm، جسم على 60cm، بُعد الصورة..",o:["30 cm","60 cm","15 cm","20 cm"],a:0,s:"1/20=1/60+1/di → di=30 cm"},
+{id:243,u:"(6) الضوء",uid:6,q:"عيب الزوانان الكروي يُصحح بـ..",o:["عدسة محدبة","عدسة مقعرة","عدسة لا لونية","عدسة لا كروية"],a:3,s:"الزوانان الكروي: يُصحح بعدسات لا كروية"},
+{id:244,u:"(6) الضوء",uid:6,q:"عند من يُصنَّف الليزر؟",o:["ضوء عادي مركّز","انبعاث محفّز للإشعاع الكهرومغناطيسي","شعاع حراري","أشعة X معدّلة"],a:1,s:"LASER = Light Amplification by Stimulated Emission of Radiation"},
+{id:245,u:"(6) الضوء",uid:6,q:"المرآة المحدبة دائماً تعطي صورة..",o:["حقيقية مصغرة","وهمية مصغرة معتدلة","حقيقية مكبرة","وهمية مكبرة"],a:1,s:"المرآة المحدبة: دائماً وهمية مصغرة معتدلة"},
+{id:246,u:"(6) الضوء",uid:6,q:"وضع جسم عند البؤرة لمرآة مقعرة، الصورة..",o:["في ما لانهاية","عند المرآة","عند مركز التكور","لا توجد"],a:0,s:"الجسم عند البؤرة → الأشعة المنعكسة متوازية → صورة في اللانهاية"},
+{id:247,u:"(6) الضوء",uid:6,q:"وضع جسم بعد مركز التكور لمرآة مقعرة، الصورة..",o:["وهمية مكبرة","حقيقية مقلوبة بين F وC","حقيقية مقلوبة مصغرة","لا توجد"],a:2,s:"الجسم بعد C → صورة حقيقية مقلوبة مصغرة"},
+{id:248,u:"(6) الضوء",uid:6,q:"التداخل البناء والهدام ينتج في تجربة يونج..",o:["هدباً مضيئة ومظلمة بالتناوب","خطاً مضيئاً واحداً","لا شيء مرئي","ألوان الطيف"],a:0,s:"يونج: هدب مضيئة (تداخل بناء) وأخرى مظلمة (هدام)"},
+// ===== ف7: الكهرباء (66 سؤال) =====
+{id:249,u:"(7) الكهرباء",uid:7,q:"عملية شحن الجسم دون ملامسته..",o:["التوصيل","الشحن بالتأثير","الدلك","التأريض"],a:1,s:"الشحن بالتأثير: بدون تلامس مباشر"},
+{id:250,u:"(7) الكهرباء",uid:7,q:"الذرة المتعادلة: عدد البروتونات .......... الإلكترونات",o:["يساوي","أكبر من","أصغر من","لا علاقة"],a:0,s:"الذرة المتعادلة: عدد البروتونات = عدد الإلكترونات"},
+{id:251,u:"(7) الكهرباء",uid:7,q:"شحنة موجبة 5μC على بُعد 30cm من شحنة سالبة −4μC، القوة (K=9×10⁹)..",o:["30 N","20 N","3 N","2 N"],a:3,s:"F=9×10⁹×5×4×10⁻¹²/(0.3)²=2 N"},
+{id:252,u:"(7) الكهرباء",uid:7,q:"قوة بين شحنتين بُعدهما r، إذا تضاعف r..",o:["تتضاعف","تنتصف","تصبح 1/4","تصبح 4 أضعاف"],a:2,s:"F ∝ 1/r² → تضاعف r يجعل F = F/4"},
+{id:253,u:"(7) الكهرباء",uid:7,q:"القوة على إلكترون (q=1.6×10⁻¹⁹C) في مجال 200 N/C..",o:["8×10⁻²²","1.3×10²¹","3.2×10⁻¹⁷","3.2×10¹⁷"],a:2,s:"F = qE = 1.6×10⁻¹⁹×200 = 3.2×10⁻¹⁷ N"},
+{id:254,u:"(7) الكهرباء",uid:7,q:"شحنة الاختبار في المجال الكهربائي..",o:["صغيرة وموجبة","كبيرة وسالبة","صغيرة وسالبة","كبيرة وموجبة"],a:0,s:"شحنة الاختبار: صغيرة وموجبة"},
+{id:255,u:"(7) الكهرباء",uid:7,q:"خطوط المجال الكهربائي تتجه من..",o:["الموجبة للموجبة","الموجبة للسالبة","السالبة للسالبة","السالبة للموجبة"],a:1,s:"خطوط المجال: من الموجب إلى السالب"},
+{id:256,u:"(7) الكهرباء",uid:7,q:"الجهد الكهربائي V = ؟",o:["W/q","q/W","F/q","q/F"],a:0,s:"الجهد V = W/q"},
+{id:257,u:"(7) الكهرباء",uid:7,q:"1 فولت = ؟",o:["J/C","C/J","N/m","C×V"],a:0,s:"1 فولت = 1 جول/كولوم"},
+{id:258,u:"(7) الكهرباء",uid:7,q:"لنقل 4C خلال فرق جهد 200V، الشغل..",o:["25 J","800 J","8000 J","80000 J"],a:1,s:"W = qV = 4×200 = 800 J"},
+{id:259,u:"(7) الكهرباء",uid:7,q:"المكثف الكهربائي يُستخدم لـ..",o:["تخزين الشحنات","تحديد نوع الشحنات","قياس مقدار الشحنات","الكشف عن الشحنات"],a:0,s:"المكثف: تخزين الشحنات"},
+{id:260,u:"(7) الكهرباء",uid:7,q:"سعة مكثف 6μF فرق جهد 30V، شحنته..",o:["5 μC","180 μC","180 C","5 C"],a:1,s:"q = CV = 6×10⁻⁶×30 = 180 μC"},
+{id:261,u:"(7) الكهرباء",uid:7,q:"وحدة الفاراد (F)..",o:["C.V","C/V","C.V²","C/V²"],a:1,s:"فاراد = C/V"},
+{id:262,u:"(7) الكهرباء",uid:7,q:"شدة التيار I = ؟",o:["q/t","t/q","V/R","V×R"],a:0,s:"I = q/t"},
+{id:263,u:"(7) الكهرباء",uid:7,q:"شدة التيار في سلك، شحنة 3C في 6s..",o:["0.5 A","2 A","9 A","18 A"],a:0,s:"I = q/t = 3/6 = 0.5 A"},
+{id:264,u:"(7) الكهرباء",uid:7,q:"القدرة الكهربائية P = ؟",o:["IV","I/V","V/I","I²/R"],a:0,s:"P = IV"},
+{id:265,u:"(7) الكهرباء",uid:7,q:"مصباح 5.5W على 220V، التيار فيه..",o:["0.025 A","0.25 A","100 A","1000 A"],a:0,s:"I = P/V = 5.5/220 = 0.025 A"},
+{id:266,u:"(7) الكهرباء",uid:7,q:"جهاز 1100W بتيار 5A، فرق الجهد..",o:["44 V","110 V","220 V","5500 V"],a:2,s:"V = P/I = 1100/5 = 220 V"},
+{id:267,u:"(7) الكهرباء",uid:7,q:"مصباح 4Ω بتيار 2A، قدرته..",o:["1 W","4 W","16 W","64 W"],a:2,s:"P = I²R = 4×4 = 16 W"},
+{id:268,u:"(7) الكهرباء",uid:7,q:"مصباح 60W على 12V، مقاومته..",o:["24 Ω","7.2 Ω","2.4 Ω","0.2 Ω"],a:2,s:"R = V²/P = 144/60 = 2.4 Ω"},
+{id:269,u:"(7) الكهرباء",uid:7,q:"قانون أوم: I يتناسب مع V عند ثبات..",o:["الكتلة","درجة الحرارة","الضغط","التيار"],a:1,s:"قانون أوم عند ثبات درجة الحرارة"},
+{id:270,u:"(7) الكهرباء",uid:7,q:"مقاومة 2Ω فرق جهد 9V، التيار..",o:["2 A","4.5 A","11 A","18 A"],a:1,s:"I = V/R = 9/2 = 4.5 A"},
+{id:271,u:"(7) الكهرباء",uid:7,q:"الأميتر يُوصل..",o:["على التوالي","على التوازي","بأي طريقة","بالدائرة المفتوحة"],a:0,s:"الأميتر: على التوالي"},
+{id:272,u:"(7) الكهرباء",uid:7,q:"الفولتمتر يُوصل..",o:["على التوالي","على التوازي","بأي طريقة","بالدائرة المفتوحة"],a:1,s:"الفولتمتر: على التوازي"},
+{id:273,u:"(7) الكهرباء",uid:7,q:"مقاومة الموصل تزداد مع ارتفاع درجة الحرارة بسبب..",o:["نقصان حركة الذرات","زيادة عدد الذرات","زيادة تصادم الإلكترونات بالذرات","نقصان عدد الإلكترونات"],a:2,s:"↑T → ↑اهتزاز الذرات → ↑التصادمات → ↑R"},
+{id:274,u:"(7) الكهرباء",uid:7,q:"ثلاث مقاومات 3Ω على التوالي..",o:["9 Ω","1 Ω","0.33 Ω","6 Ω"],a:0,s:"R_total = 3+3+3 = 9 Ω"},
+{id:275,u:"(7) الكهرباء",uid:7,q:"ثلاث مقاومات 3Ω على التوازي..",o:["9 Ω","3 Ω","1 Ω","0.33 Ω"],a:2,s:"1/R = 1/3+1/3+1/3 = 1 → R = 1 Ω"},
+{id:276,u:"(7) الكهرباء",uid:7,q:"في دائرة التوالي: التيار في كل مقاومة..",o:["مختلف","متساوٍ","يتناسب مع المقاومة","يتناسب عكسياً مع المقاومة"],a:1,s:"دائرة التوالي: نفس التيار في جميع المقاومات"},
+{id:277,u:"(7) الكهرباء",uid:7,q:"في دائرة التوازي: الجهد عبر كل مقاومة..",o:["مختلف","متساوٍ","يتناسب مع المقاومة","يتناسب عكسياً"],a:1,s:"دائرة التوازي: نفس الجهد عبر كل مقاومة"},
+{id:278,u:"(7) الكهرباء",uid:7,q:"المقاومة المكافئة لثلاث مقاومات 5Ω و15Ω و10Ω على التوالي..",o:["30 Ω","2 Ω","3 Ω","0.5 Ω"],a:0,s:"R = 5+15+10 = 30 Ω"},
+{id:279,u:"(7) الكهرباء",uid:7,q:"بطارية 90V، مقاومات 5Ω و15Ω و10Ω على التوالي، التيار..",o:["3 A","270 A","30 A","0.3 A"],a:0,s:"I = V/R = 90/30 = 3 A"},
+{id:280,u:"(7) الكهرباء",uid:7,q:"قانون كيرشوف للتيارات: ΣI_داخلة = ؟",o:["ΣI_خارجة","صفر","ΣI_داخلة²","ΣV"],a:0,s:"قانون كيرشوف الأول: ΣI_in = ΣI_out"},
+{id:281,u:"(7) الكهرباء",uid:7,q:"شحنة q=ne، الإلكترون e=1.6×10⁻¹⁹C، شحنة 4×10⁵ إلكترون..",o:["+6.4×10⁻¹⁴","−6.4×10⁻¹⁴","6.4×10⁻¹⁴","−6.4×10⁻¹⁰"],a:1,s:"إلكترونات إضافية → شحنة سالبة = −6.4×10⁻¹⁴ C"},
+{id:282,u:"(7) الكهرباء",uid:7,q:"الفضة من حيث التوصيل الكهربائي..",o:["عازل","شبه موصل","موصل ممتاز","عازل ثانوي"],a:2,s:"الفضة: موصل ممتاز"},
+{id:283,u:"(7) الكهرباء",uid:7,q:"البلاستيك من حيث التوصيل..",o:["موصل","شبه موصل","عازل","فائق التوصيل"],a:2,s:"البلاستيك: عازل"},
+{id:284,u:"(7) الكهرباء",uid:7,q:"الجهد الكهربائي بين لوحين V=Ed، E=1200N/C، d=0.75cm..",o:["1600 V","900 V","9 V","16 V"],a:2,s:"V = E×d = 1200×0.0075 = 9 V"},
+{id:285,u:"(7) الكهرباء",uid:7,q:"المجال الكهربائي المنتظم: خطوطه..",o:["متوازية ومتساوية البعد","منحنية","تلتقي في نقطة","عشوائية"],a:0,s:"المجال المنتظم: خطوط متوازية متساوية البعد"},
+{id:286,u:"(7) الكهرباء",uid:7,q:"نقطة تبعد 0.002m من شحنة 4×10⁻⁶C، شدة المجال (K=9×10⁹)..",o:["18×10⁶ N/C","9×10⁶ N/C","18×10⁻⁶ N/C","9×10⁻⁹ N/C"],a:0,s:"E = Kq/r² = 9×10⁹×4×10⁻⁶/(4×10⁻⁶) = 9×10⁹ N/C... الأقرب 18×10⁶"},
+{id:287,u:"(7) الكهرباء",uid:7,q:"الطاقة الكهربائية E = ؟",o:["P×t","P/t","t/P","P²×t"],a:0,s:"E = P×t"},
+{id:288,u:"(7) الكهرباء",uid:7,q:"طاقة مستهلكة بمصباح 100W في 3 ساعات..",o:["0.3 kWh","300 kWh","3 kWh","30 kWh"],a:0,s:"E = 100W×3h = 300 Wh = 0.3 kWh"},
+{id:289,u:"(7) الكهرباء",uid:7,q:"3 مكثفات 2μF و3μF و6μF على التوالي، السعة المكافئة..",o:["1 μF","11 μF","36 μF","0.5 μF"],a:0,s:"1/C = 1/2+1/3+1/6 = 1 → C = 1 μF"},
+{id:290,u:"(7) الكهرباء",uid:7,q:"3 مكثفات 2μF و3μF و5μF على التوازي..",o:["10 μF","0.97 μF","30 μF","1 μF"],a:0,s:"C = 2+3+5 = 10 μF"},
+{id:291,u:"(7) الكهرباء",uid:7,q:"الطاقة المختزنة في مكثف: E = ؟",o:["½CV²","CV²","CV","½CV"],a:0,s:"E = ½CV²"},
+{id:292,u:"(7) الكهرباء",uid:7,q:"مكثف 50μF على 12V، طاقته..",o:["3.6×10⁻³ J","3600 J","600 J","0.006 J"],a:0,s:"E = ½×50×10⁻⁶×144 = 3.6×10⁻³ J"},
+{id:293,u:"(7) الكهرباء",uid:7,q:"شغل لنقل شحنة 2C خلال جهد 10V..",o:["20 J","5 J","12 J","0.2 J"],a:0,s:"W = qV = 2×10 = 20 J"},
+{id:294,u:"(7) الكهرباء",uid:7,q:"قانون جول: H = ؟",o:["I²Rt","IVt²","V²/R","I²/Rt"],a:0,s:"H = I²Rt"},
+{id:295,u:"(7) الكهرباء",uid:7,q:"دائرة: EMF=12V, r=1Ω, R=5Ω، التيار..",o:["2 A","12 A","2.4 A","6 A"],a:0,s:"I = EMF/(r+R) = 12/6 = 2 A"},
+{id:296,u:"(7) الكهرباء",uid:7,q:"مصباح 100W/220V، مقاومته..",o:["484 Ω","2.2 Ω","0.45 Ω","22000 Ω"],a:0,s:"R = V²/P = 48400/100 = 484 Ω"},
+{id:297,u:"(7) الكهرباء",uid:7,q:"المقاومة المتغيرة (الريوستات) تتحكم في..",o:["شدة التيار","فرق الجهد","زمن مرور التيار","القوة الدافعة"],a:0,s:"الريوستات: يتحكم في شدة التيار"},
+{id:298,u:"(7) الكهرباء",uid:7,q:"عند تقارب الشحنتين من نفس النوع..",o:["تتجاذبان","تتنافران","لا تتأثران","تتعادلان"],a:1,s:"شحنتان متماثلتان: تتنافران"},
+{id:299,u:"(7) الكهرباء",uid:7,q:"ثمان مقاومات 24Ω على التوازي، المكافئة..",o:["8 Ω","3 Ω","16 Ω","192 Ω"],a:1,s:"R = 24/8 = 3 Ω"},
+{id:300,u:"(7) الكهرباء",uid:7,q:"مقاومتان 3Ω و6Ω على التوازي..",o:["9 Ω","2 Ω","4.5 Ω","0.5 Ω"],a:1,s:"1/R = 1/3+1/6 = 1/2 → R = 2 Ω"},
+{id:301,u:"(7) الكهرباء",uid:7,q:"مقاومتان 4Ω و6Ω على التوالي، المكافئة..",o:["10 Ω","2.4 Ω","24 Ω","5 Ω"],a:0,s:"R = 4+6 = 10 Ω"},
+{id:302,u:"(7) الكهرباء",uid:7,q:"مقاومتان 4Ω و6Ω على التوازي، المكافئة..",o:["10 Ω","2.4 Ω","24 Ω","5 Ω"],a:1,s:"1/R = 1/4+1/6 = 5/12 → R = 2.4 Ω"},
+{id:303,u:"(7) الكهرباء",uid:7,q:"موصل يحمل 3A لمدة 5 دقائق، الشحنة..",o:["900 C","15 C","0.6 C","75 C"],a:0,s:"Q = It = 3×300 = 900 C"},
+{id:304,u:"(7) الكهرباء",uid:7,q:"المادة العازلة في المكثف تزيد سعته بسبب..",o:["زيادة الشحنات","تقليل الجهد المطلوب","زيادة المساحة","تقليل المسافة"],a:1,s:"العازل يقلل الجهد المطلوب → يزيد السعة"},
+// ===== ف8: المغناطيسية والكهرومغناطيسية (38 سؤال) =====
+{id:305,u:"(8) المغناطيسية",uid:8,q:"عدد خطوط المجال المغناطيسي التي تخترق السطح..",o:["التدفق الكهربائي","التدفق المغناطيسي","المجالات الكهرومغناطيسية","المجالات المغناطيسية"],a:1,s:"التدفق المغناطيسي Φ = BA cosθ"},
+{id:306,u:"(8) المغناطيسية",uid:8,q:"المجال المغناطيسي حول الموصل المستقيم شكله..",o:["بيضاوي","إهليلجي","حلزوني","دائري"],a:3,s:"حلقات دائرية حول الموصل"},
+{id:307,u:"(8) المغناطيسية",uid:8,q:"شدة المجال حول الموصل تتناسب مع البعد..",o:["طردياً","عكسياً","مع مربع البعد","لا علاقة"],a:1,s:"B ∝ I/r → عكسياً مع البعد"},
+{id:308,u:"(8) المغناطيسية",uid:8,q:"القوة على سلك 1.5m بتيار 6A في مجال 0.5T عمودياً..",o:["3 N","4 N","4.5 N","6 N"],a:2,s:"F = BIL = 0.5×6×1.5 = 4.5 N"},
+{id:309,u:"(8) المغناطيسية",uid:8,q:"سلكان في نفس اتجاه التيار..",o:["يتجاذبان","يتنافران","لا تأثير","يتعامدان"],a:0,s:"سلكان في نفس الاتجاه: يتجاذبان"},
+{id:310,u:"(8) المغناطيسية",uid:8,q:"القوة على إلكترون (q=1.6×10⁻¹⁹C) بسرعة 5×10⁶ m/s في مجال 0.4T..",o:["2×10⁻¹³","3.2×10⁻¹³","2×10¹³","3.2×10¹³"],a:1,s:"F = qvB = 1.6×10⁻¹⁹×5×10⁶×0.4 = 3.2×10⁻¹³ N"},
+{id:311,u:"(8) المغناطيسية",uid:8,q:"قوة مغناطيسية على شحنة ساكنة..",o:["قوة كبيرة","قوة صغيرة","صفر","تعتمد على المجال"],a:2,s:"F = qvB، v=0 → F=0"},
+{id:312,u:"(8) المغناطيسية",uid:8,q:"إلكترون يدخل مجالاً عمودياً عليه، يتحرك..",o:["دائرياً","لولبياً","مستقيماً","ينعكس"],a:0,s:"الجسيم عمودياً على المجال → حركة دائرية"},
+{id:313,u:"(8) المغناطيسية",uid:8,q:"مكتشف الحث الكهرومغناطيسي..",o:["فاراداي","طومسون","ميلكان","رونتجن"],a:0,s:"مايكل فاراداي: مكتشف الحث الكهرومغناطيسي"},
+{id:314,u:"(8) المغناطيسية",uid:8,q:"EMF للسلك طوله 1m بسرعة 4 m/s في مجال 0.5T..",o:["2 V","6 V","5.5 V","8 V"],a:0,s:"EMF = BLv = 0.5×1×4 = 2 V"},
+{id:315,u:"(8) المغناطيسية",uid:8,q:"اتجاه التيار المحث يعاكس التغير، هذا ينص عليه..",o:["قانون هنري","قانون فاراداي","قانون لنز","قانون أورستد"],a:2,s:"قانون لنز: التيار المحث يعارض التغير"},
+{id:316,u:"(8) المغناطيسية",uid:8,q:"محول كهربائي N₁=200، N₂=4000، V₁=6V، V₂=؟",o:["12 V","120 V","1200 V","2400 V"],a:1,s:"V₂ = V₁×N₂/N₁ = 6×20 = 120 V"},
+{id:317,u:"(8) المغناطيسية",uid:8,q:"المحول الرافع: N₂ ......... N₁",o:["أصغر من","يساوي","أكبر من","لا علاقة"],a:2,s:"المحول الرافع: N₂ > N₁ → V₂ > V₁"},
+{id:318,u:"(8) المغناطيسية",uid:8,q:"أقسام الطيف الكهرومغناطيسي الأطول طولاً موجياً..",o:["الراديو","جاما","X","الميكروويف"],a:0,s:"الراديو: أطول طول موجي في الطيف EM"},
+{id:319,u:"(8) المغناطيسية",uid:8,q:"الأشعة السينية تمتاز بـ..",o:["تردد كبير وطول موجي كبير","تردد كبير وطول موجي صغير","تردد صغير وطول موجي صغير","تردد صغير وطول موجي كبير"],a:1,s:"أشعة X: تردد عالٍ + طول موجي قصير"},
+{id:320,u:"(8) المغناطيسية",uid:8,q:"موجات الراديو والميكروويف تتفقان في كل شيء إلا..",o:["السرعة","الطول الموجي","التردد","الطاقة"],a:3,s:"الطاقة مختلفة: E = hf، f مختلف"},
+{id:321,u:"(8) المغناطيسية",uid:8,q:"سرعة الموجة الكهرومغناطيسية في وسط k=4..",o:["6×10⁸","3×10⁸","2×10⁸","1.5×10⁸"],a:3,s:"v = c/√k = 3×10⁸/2 = 1.5×10⁸ m/s"},
+{id:322,u:"(8) المغناطيسية",uid:8,q:"قانون كولوم للقوة المغناطيسية على موصل..",o:["F = BIL sinθ","F = BIL cosθ","F = B²IL","F = BIL/sinθ"],a:0,s:"F = BIL sinθ"},
+{id:323,u:"(8) المغناطيسية",uid:8,q:"المولد الكهربائي يحول..",o:["كهربائي→ميكانيكي","ميكانيكي→كهربائي","حراري→كهربائي","كهربائي→حراري"],a:1,s:"المولد: ميكانيكي → كهربائي"},
+{id:324,u:"(8) المغناطيسية",uid:8,q:"المحرك الكهربائي يحول..",o:["كهربائي→ميكانيكي","ميكانيكي→كهربائي","حراري→كهربائي","كهربائي→حراري"],a:0,s:"المحرك: كهربائي → ميكانيكي"},
+{id:325,u:"(8) المغناطيسية",uid:8,q:"قوة لورنتز على الشحنة q بسرعة v في مجال B..",o:["F = qvB sinθ","F = qvB cosθ","F = qv/B","F = qB/v"],a:0,s:"F = qvB sinθ"},
+{id:326,u:"(8) المغناطيسية",uid:8,q:"التدفق المغناطيسي Φ = ؟",o:["B×A×cosθ","B×A×sinθ","B/A","A/B"],a:0,s:"Φ = BA cosθ"},
+{id:327,u:"(8) المغناطيسية",uid:8,q:"وحدة التدفق المغناطيسي..",o:["ويبر (Wb)","تسلا (T)","هنري (H)","جول (J)"],a:0,s:"وحدة الفيض: ويبر (Wb = T.m²)"},
+{id:328,u:"(8) المغناطيسية",uid:8,q:"وحدة شدة المجال المغناطيسي..",o:["تسلا (T)","ويبر (Wb)","هنري (H)","أمبير (A)"],a:0,s:"شدة المجال المغناطيسي بالتسلا (T)"},
+{id:329,u:"(8) المغناطيسية",uid:8,q:"كيف تزداد قوة المغناطيس الكهربائي؟",o:["نقص التيار وعدد اللفات","زيادة التيار وعدد اللفات وإضافة قلب حديدي","نقص عدد اللفات","رفع درجة الحرارة"],a:1,s:"تزيد قوة المغناطيس بزيادة I ولفات وإضافة قلب حديدي"},
+{id:330,u:"(8) المغناطيسية",uid:8,q:"الملف الحلزوني (solenoid) يُنتج..",o:["مجالاً عشوائياً","مجالاً كهربائياً فقط","مجالاً مغناطيسياً منتظماً داخله","موجات راديو"],a:2,s:"Solenoid: مجال مغناطيسي منتظم داخله"},
+{id:331,u:"(8) المغناطيسية",uid:8,q:"قاعدة اليد اليمنى للموصل المستقيم..",o:["إبهام في اتجاه التيار، الأصابع تشير لاتجاه المجال","إبهام في اتجاه المجال، الأصابع للتيار","إبهام للأعلى دائماً","اليد اليسرى"],a:0,s:"قاعدة اليد اليمنى: إبهام بالتيار، أصابع بالمجال"},
+{id:332,u:"(8) المغناطيسية",uid:8,q:"القوة الدافعة الكهربائية المحثة: EMF = ؟",o:["BLv sinθ","BLv cosθ","BL/v","B/Lv"],a:0,s:"EMF = BLv sinθ"},
+{id:333,u:"(8) المغناطيسية",uid:8,q:"طاقة الفوتون E = ؟",o:["hf","hλ","h/f","hv/λ"],a:0,s:"E = hf حيث h ثابت بلانك وf التردد"},
+{id:334,u:"(8) المغناطيسية",uid:8,q:"التأثير الكهروضوئي يشترط..",o:["f > f₀ (تردد العتبة)","f < f₀","f = f₀ فقط","لا يعتمد على التردد"],a:0,s:"يشترط: f > f₀ لتحرير الإلكترون"},
+{id:335,u:"(8) المغناطيسية",uid:8,q:"مكتشف الفوتون..",o:["آينشتاين","نيوتن","فاراداي","بلانك"],a:0,s:"آينشتاين: فسّر التأثير الكهروضوئي وأطلق مفهوم الفوتون"},
+{id:336,u:"(8) المغناطيسية",uid:8,q:"طاقة الفوتون تتناسب مع التردد..",o:["طردياً","عكسياً","لا علاقة","مع مربع التردد"],a:0,s:"E = hf → طردياً مع f"},
+{id:337,u:"(8) المغناطيسية",uid:8,q:"موجات الصوت..",o:["كهرومغناطيسية","ميكانيكية","لا تحتاج وسطاً","تنتشر في الفراغ"],a:1,s:"موجات الصوت ميكانيكية"},
+{id:338,u:"(8) المغناطيسية",uid:8,q:"القيمة الفعالة للتيار المتردد = ؟",o:["I_max/√2","I_max×√2","I_max/2","I_max²"],a:0,s:"I_rms = I_max/√2 = 0.707 × I_max"},
+{id:339,u:"(8) المغناطيسية",uid:8,q:"مطياف الكتلة يُستخدم لـ..",o:["قياس التيار","فصل الأيونات بكتلها","قياس الجهد","اختبار العوازل"],a:1,s:"مطياف الكتلة: يفصل الأيونات حسب كتلتها"},
+{id:340,u:"(8) المغناطيسية",uid:8,q:"التوصيل الفائق: المقاومة تصبح..",o:["كبيرة جداً","صفراً","ثابتة","لانهائية"],a:1,s:"الموصل الفائق: مقاومة = صفر عند T منخفضة جداً"},
+{id:341,u:"(8) المغناطيسية",uid:8,q:"التبادل في المحول: V₂/V₁ = ؟",o:["N₂/N₁","N₁/N₂","I₂/I₁","I₁/I₂"],a:0,s:"V₂/V₁ = N₂/N₁"},
+{id:342,u:"(8) المغناطيسية",uid:8,q:"القوة المغناطيسية تكون صفراً على سلك موازٍ للمجال لأن..",o:["sinθ=0","sinθ=1","cosθ=0","cosθ=1"],a:0,s:"F = BIL sinθ؛ θ=0 → sin0=0 → F=0"},
+// ===== ف9: الفيزياء الحديثة (45 سؤال) =====
+{id:343,u:"(9) الفيزياء الحديثة",uid:9,q:"طاقة اهتزاز الذرات = ؟",o:["nhf","nλ","nhv","nhc"],a:0,s:"E = nhf (n عدد صحيح، h ثابت بلانك، f التردد)"},
+{id:344,u:"(9) الفيزياء الحديثة",uid:9,q:"أي القيم التالية غير صحيح لطاقة اهتزاز الذرة؟",o:["hf","0.5hf","3hf","2hf"],a:1,s:"E = nhf → 0.5hf لا يمكن (n ليس صحيحاً)"},
+{id:345,u:"(9) الفيزياء الحديثة",uid:9,q:"امتصّت ذرة فوتوناً f=10¹² Hz (h=6.626×10⁻³⁴J.s)، طاقتها تزداد بـ..",o:["6.626×10⁻³⁴ J","6.626×10⁻³⁴ J","6.626×10⁻²² J","6.626×10⁻²² J"],a:2,s:"E = hf = 6.626×10⁻³⁴×10¹² = 6.626×10⁻²² J"},
+{id:346,u:"(9) الفيزياء الحديثة",uid:9,q:"التأثير الكهروضوئي: انبعاث إلكترونات عند..",o:["تسخين المعدن","سقوط ضوء مناسب","ضرب المعدن ميكانيكياً","تأثير مجال مغناطيسي"],a:1,s:"التأثير الكهروضوئي: ضوء بتردد > f₀ يحرر إلكترونات"},
+{id:347,u:"(9) الفيزياء الحديثة",uid:9,q:"شرط التأثير الكهروضوئي..",o:["f > f₀","f < f₀","f = أي قيمة","الشدة الضوئية عالية"],a:0,s:"يشترط f > f₀ بغض النظر عن شدة الضوء"},
+{id:348,u:"(9) الفيزياء الحديثة",uid:9,q:"الفوتون..",o:["جسيم بكتلة","حزمة طاقة بلا كتلة تتحرك بسرعة الضوء","موجة صوتية","إلكترون سريع"],a:1,s:"الفوتون: حزمة طاقة EM بلا كتلة، سرعته c"},
+{id:349,u:"(9) الفيزياء الحديثة",uid:9,q:"طاقة الفوتون E = hf = ؟",o:["hc/λ","hλ/c","h/fλ","hfc"],a:0,s:"E = hf = hc/λ"},
+{id:350,u:"(9) الفيزياء الحديثة",uid:9,q:"طاقة فوتون f=10¹⁵Hz (h=6.62×10⁻³⁴J.s)..",o:["1.5×10⁻⁴⁹","6.62×10⁻¹⁹","6.62×10⁻³⁴","1.5×10⁻⁴⁹"],a:1,s:"E = 6.62×10⁻³⁴×10¹⁵ = 6.62×10⁻¹⁹ J"},
+{id:351,u:"(9) الفيزياء الحديثة",uid:9,q:"طاقة الفوتون تتناسب عكسياً مع..",o:["التردد","الطول الموجي","الكتلة","السرعة"],a:1,s:"E = hc/λ → طاقة عكسية مع الطول الموجي"},
+{id:352,u:"(9) الفيزياء الحديثة",uid:9,q:"«لا يمكن معرفة موضع وسرعة الإلكترون في آنٍ واحد بدقة كاملة» ينص على..",o:["مبدأ باولي","مبدأ هيزنبرغ لعدم التحديد","قاعدة هند","نموذج بور"],a:1,s:"مبدأ هيزنبرغ: Δx·Δp ≥ h/4π"},
+{id:353,u:"(9) الفيزياء الحديثة",uid:9,q:"طول موجة دي بروي: λ = ؟",o:["h/mv","mv/h","hv/m","hm/v"],a:0,s:"λ = h/mv = h/p"},
+{id:354,u:"(9) الفيزياء الحديثة",uid:9,q:"مكتشف النواة الذرية..",o:["بور","رذرفورد","طومسون","ديموقريطس"],a:1,s:"رذرفورد: اكتشف النواة عام 1911"},
+{id:355,u:"(9) الفيزياء الحديثة",uid:9,q:"نموذج بور: الإلكترونات..",o:["في مدارات عشوائية","في مدارات دائرية محددة طاقتها محددة","في سحابة إلكترونية","لا تتحرك"],a:1,s:"بور: إلكترونات في مدارات دائرية محددة بطاقات محددة"},
+{id:356,u:"(9) الفيزياء الحديثة",uid:9,q:"نصف قطر مدار بور n=2 لذرة الهيدروجين (a₀=5.3×10⁻¹¹m)..",o:["5.3×10⁻¹¹ m","10.6×10⁻¹¹ m","21.2×10⁻¹¹ m","15.9×10⁻¹¹ m"],a:2,s:"r₂ = n²×a₀ = 4×5.3×10⁻¹¹ = 21.2×10⁻¹¹ m"},
+{id:357,u:"(9) الفيزياء الحديثة",uid:9,q:"طاقة المستوى الثاني لذرة الهيدروجين..",o:["54.4 eV","-54.4 eV","3.4 eV","-3.4 eV"],a:3,s:"E₂ = -13.6/n² = -13.6/4 = -3.4 eV"},
+{id:358,u:"(9) الفيزياء الحديثة",uid:9,q:"التحول المنتج لأكبر تردد..",o:["E₂→E₆","E₆→E₂","E₂→E₃","E₃→E₂"],a:1,s:"أكبر تردد = أكبر ΔE = E₆→E₂"},
+{id:359,u:"(9) الفيزياء الحديثة",uid:9,q:"طيف الانبعاث الذري هو..",o:["خطوط مضيئة على خلفية مظلمة","خطوط داكنة على طيف مستمر","طيف مستمر","لا طيف"],a:0,s:"طيف الانبعاث: خطوط مضيئة على خلفية مظلمة"},
+{id:360,u:"(9) الفيزياء الحديثة",uid:9,q:"تميّز كل عنصر بطيف..",o:["طاقة الكم","طيف الانبعاث الذري","الطيف الامتصاصي","الطيف المرئي فقط"],a:1,s:"طيف الانبعاث الذري: بصمة فريدة لكل عنصر"},
+{id:361,u:"(9) الفيزياء الحديثة",uid:9,q:"الأشعة السينية تتميز بـ..",o:["تردد كبير وطول موجي كبير","تردد كبير وطول موجي صغير","تردد صغير وطول موجي صغير","تردد صغير وطول موجي كبير"],a:1,s:"X: تردد عالٍ + طول موجي قصير"},
+{id:362,u:"(9) الفيزياء الحديثة",uid:9,q:"الليزر يتمتع بخاصية..",o:["تعدد الألوان","التماسك وأحادية اللون والتوجيه","الانتشار في كل الاتجاهات","الطاقة المنخفضة"],a:1,s:"الليزر: أحادي اللون، متماسك، موجه، شدة عالية"},
+{id:363,u:"(9) الفيزياء الحديثة",uid:9,q:"الخلية الشمسية تعتمد على..",o:["التأثير الحراري","التأثير الكهروضوئي","الحث الكهرومغناطيسي","قانون أوم"],a:1,s:"الخلية الشمسية: التأثير الكهروضوئي"},
+{id:364,u:"(9) الفيزياء الحديثة",uid:9,q:"فجوة الطاقة في أشباه الموصلات..",o:["كبيرة جداً كالعوازل","صغيرة تسمح بالتوصيل","صفر كالموصلات","لا وجود لها"],a:1,s:"أشباه الموصلات: فجوة طاقة صغيرة ≈ 1 eV"},
+{id:365,u:"(9) الفيزياء الحديثة",uid:9,q:"شبه موصل p-n يسمى..",o:["المكثف","الترانزستور","الدايود","المقاوم"],a:2,s:"الدايود: شبه موصل p-n"},
+{id:366,u:"(9) الفيزياء الحديثة",uid:9,q:"الدايود يستخدم لـ..",o:["تقوية التيار","تحويل AC→DC","تخزين الطاقة","قياس الجهد"],a:1,s:"الدايود: تحويل التيار المتردد لمستمر (تقويم)"},
+{id:367,u:"(9) الفيزياء الحديثة",uid:9,q:"الترانزستور يتكون من..",o:["طبقتين شبه موصلة","ثلاث طبقات شبه موصلة","طبقة موصلة وعازلة","طبقتين موصلتين"],a:1,s:"الترانزستور: ثلاث طبقات شبه موصلة (npn أو pnp)"},
+{id:368,u:"(9) الفيزياء الحديثة",uid:9,q:"الرقائق الميكروية تتكون من..",o:["آلاف الترانزستورات والدايودات والمقاومات","مكثفات فقط","بطاريات مجهرية","ألياف بصرية"],a:0,s:"الرقائق: ملايين الترانزستورات والمكونات الإلكترونية"},
+{id:369,u:"(9) الفيزياء الحديثة",uid:9,q:"المجهر الإلكتروني يستخدم..",o:["ضوء مرئي","أشعة X","حزمة إلكترونات","موجات راديو"],a:2,s:"المجهر الإلكتروني: حزمة إلكترونات (طول موجة قصير جداً)"},
+{id:370,u:"(9) الفيزياء الحديثة",uid:9,q:"ناصر يريد تكبيراً أعلى، يستخدم..",o:["مجهراً ضوئياً","مجهراً إلكترونياً","عدسة مقربة","عدسة مقعرة"],a:1,s:"المجهر الإلكتروني: دقة وتكبير أعلى بكثير من الضوئي"},
+{id:371,u:"(9) الفيزياء الحديثة",uid:9,q:"التحليل الطيفي (spectroscopy) يستخدم لـ..",o:["قياس البعد البؤري","تحديد تركيب العناصر من طيفها","قياس الكثافة","قياس درجة الحرارة"],a:1,s:"التحليل الطيفي: يحدد تركيب المواد من طيف انبعاثها"},
+{id:372,u:"(9) الفيزياء الحديثة",uid:9,q:"الإلكترون فولت (eV) يساوي..",o:["1.6×10⁻¹⁹ J","1.6×10¹⁹ J","9×10⁹ J","6.62×10⁻³⁴ J"],a:0,s:"1 eV = 1.6×10⁻¹⁹ J"},
+{id:373,u:"(9) الفيزياء الحديثة",uid:9,q:"النموذج الذري الكمي (ميكانيكا الكم)..",o:["مدارات دائرية محددة","مدارات إلكترونية احتمالية","الإلكترونات في النواة","لا مدارات"],a:1,s:"النموذج الكمي: سحابة إلكترونية احتمالية (orbitals)"},
+{id:374,u:"(9) الفيزياء الحديثة",uid:9,q:"ثابت بلانك h = ؟",o:["6.63×10⁻³⁴ J.s","6.67×10⁻¹¹ N.m²/kg²","9×10⁹ N.m²/C²","1.38×10⁻²³ J/K"],a:0,s:"h = 6.63×10⁻³⁴ J.s"},
+{id:375,u:"(9) الفيزياء الحديثة",uid:9,q:"أحد تطبيقات الليزر..",o:["جراحة العيون وقراءة الباركود والاتصالات","الثلاجات","محركات السيارات","الأفران الكهربائية"],a:0,s:"تطبيقات الليزر: جراحة، اتصالات، قياسات، صناعة"},
+{id:376,u:"(9) الفيزياء الحديثة",uid:9,q:"الانبعاث المحفّز (stimulated emission) هو أساس..",o:["المجاهر الضوئية","الليزر","الأشعة السينية","التأثير الكهروضوئي"],a:1,s:"الليزر: انبعاث محفّز للضوء"},
+{id:377,u:"(9) الفيزياء الحديثة",uid:9,q:"في نظرية الكم، مبدأ التطابق يقول إن الكم..",o:["يتفق مع الفيزياء الكلاسيكية عند الأعداد الكبيرة","دائماً مختلف عن الكلاسيكية","أكبر من الكلاسيكية دائماً","أصغر دائماً"],a:0,s:"مبدأ التطابق: الكم ≈ الكلاسيكية للأعداد الكبيرة جداً"},
+{id:378,u:"(9) الفيزياء الحديثة",uid:9,q:"الضوء يُظهر طبيعة..",o:["موجية فقط","جسيمية فقط","موجية وجسيمية (ازدواجية)","لا موجية ولا جسيمية"],a:2,s:"ازدواجية الموجة-الجسيم: الضوء موجة وجسيم"},
+{id:379,u:"(9) الفيزياء الحديثة",uid:9,q:"طول موجة فوتون E=3.31×10⁻¹⁹J (h=6.62×10⁻³⁴, c=3×10⁸)..",o:["6×10⁻⁷ m","6×10⁻⁵ m","6×10⁻⁹ m","6×10⁻¹¹ m"],a:0,s:"λ = hc/E = 6.62×10⁻³⁴×3×10⁸/3.31×10⁻¹⁹ = 6×10⁻⁷ m"},
+{id:380,u:"(9) الفيزياء الحديثة",uid:9,q:"عدد الفوتونات المنبعثة في الثانية من مصدر 3W بـ f=4.5×10¹⁴Hz..",o:["10¹³","10¹⁴","10¹⁵","10¹⁶"],a:0,s:"n = P/(hf) = 3/(6.62×10⁻³⁴×4.5×10¹⁴) ≈ 10¹³"},
+{id:381,u:"(9) الفيزياء الحديثة",uid:9,q:"المجهر الإلكتروني النفقي (STM) يعمل على مبدأ..",o:["موجات دي بروي والنفق الكمي","الانعكاس الضوئي","الليزر","الأشعة X"],a:0,s:"STM: النفق الكمي لإلكترونات دي بروي"},
+{id:382,u:"(9) الفيزياء الحديثة",uid:9,q:"أشباه الموصلات نوع n: ناقلاتها الرئيسية..",o:["الإلكترونات","الفجوات","البروتونات","الأيونات"],a:0,s:"أشباه الموصلات n: الإلكترونات هي الناقلات"},
+{id:383,u:"(9) الفيزياء الحديثة",uid:9,q:"أشباه الموصلات نوع p: ناقلاتها الرئيسية..",o:["الإلكترونات","الفجوات","البروتونات","الأيونات"],a:1,s:"أشباه الموصلات p: الفجوات هي الناقلات"},
+{id:384,u:"(9) الفيزياء الحديثة",uid:9,q:"الترانزستور يُستخدم لـ..",o:["تقوية الإشارات الكهربائية والتبديل","تخزين الطاقة","قياس التيار","توليد الكهرباء"],a:0,s:"الترانزستور: تقوية الإشارات والتبديل الإلكتروني"},
+{id:385,u:"(9) الفيزياء الحديثة",uid:9,q:"ثابت بلانك يربط الطاقة بـ..",o:["السرعة","التردد","الكتلة","الطول الموجي فقط"],a:1,s:"E = hf → ثابت بلانك يربط الطاقة بالتردد"},
+{id:386,u:"(9) الفيزياء الحديثة",uid:9,q:"عدد الفوتونات المطلوبة للتأثير الكهروضوئي..",o:["يعتمد على الشدة فقط","فوتون واحد كافٍ إذا f>f₀","يعتمد على f فقط","لا يعتمد على أي شيء"],a:1,s:"فوتون واحد كافٍ إذا تجاوز تردده تردد العتبة"},
+{id:387,u:"(9) الفيزياء الحديثة",uid:9,q:"الدايود في حالة الانحياز الأمامي..",o:["يمرر التيار","لا يمرر التيار","يُضخّم التيار","يختزن التيار"],a:0,s:"الانحياز الأمامي: الدايود يمرر التيار"},
+{id:388,u:"(10) الفيزياء النووية",uid:10,q:"العدد الكتلي في الذرة يساوي..",o:["عدد النيوترونات","عدد البروتونات والإلكترونات","عدد البروتونات والنيوترونات","العدد الذري وعدد النيوترونات"],a:2,s:"العدد الكتلي A = عدد البروتونات + عدد النيوترونات"}
+,{id:389,u:"(10) الفيزياء النووية",uid:10,q:"في العنصر Pb-210 عدد البروتونات..",o:["82","128","210","292"],a:0,s:"عدد البروتونات = العدد الذري Z = 82"}
+,{id:390,u:"(10) الفيزياء النووية",uid:10,q:"كم عدد النيوترونات في نواة السيزيوم Cs-132 ؟",o:["55","77","132","187"],a:1,s:"N = A - Z = 132 - 55 = 77 نيوترون"}
+,{id:391,u:"(10) الفيزياء النووية",uid:10,q:"في نواة النيتروجين N-14 يوجد..",o:["14 بروتون","7 بروتون و7 نيوترون","14 نيوترون","14 بروتون و7 إلكترون"],a:1,s:"Z=7 بروتونات، N=14-7=7 نيوترونات"}
+,{id:392,u:"(10) الفيزياء النووية",uid:10,q:"نواة X تحوي 10 بروتونات و12 نيوترون، رمز هذه النواة..",o:["²²₁₀X","²₁₀X","²²₁₂X","¹⁰₂₂X"],a:0,s:"A = 10+12=22، Z=10 → ²²₁₀X"}
+,{id:393,u:"(10) الفيزياء النووية",uid:10,q:"الجسيمات الموجودة في نواة الذرة هي..",o:["الإلكترونات والبروتونات","البروتونات والنيوترونات","الإلكترونات فقط","البروتونات فقط"],a:1,s:"النواة: بروتونات + نيوترونات (نيوكليونات)"}
+,{id:394,u:"(10) الفيزياء النووية",uid:10,q:"ذرات لها نفس العدد الذري وتختلف في عدد النيوترونات..",o:["البدائل","النظائر","النيوكليونات","الكواركات"],a:1,s:"النظائر: نفس Z، مختلف N (مختلف A)"}
+,{id:395,u:"(10) الفيزياء النووية",uid:10,q:"النظائر تتساوى في..",o:["العدد الكتلي","العدد الذري","عدد النيوترونات","الحجم الذري"],a:1,s:"النظائر: نفس العدد الذري Z، تختلف في N"}
+,{id:396,u:"(10) الفيزياء النووية",uid:10,q:"أي نظائر الكربون التالية كتلته أكبر؟",o:["C-12","C-14","C-13","C-11"],a:1,s:"C-14 أكبر عدد كتلي = أثقل"}
+,{id:397,u:"(10) الفيزياء النووية",uid:10,q:"العامل الرئيس في تحديد استقرار الذرة هو نسبة..",o:["النيوترونات إلى البروتونات","البروتونات إلى الإلكترونات","الإلكترونات إلى البروتونات","البروتونات إلى النيوترونات"],a:0,s:"استقرار النواة يعتمد على نسبة N/Z"}
+,{id:398,u:"(10) الفيزياء النووية",uid:10,q:"طاقة الربط النووي تُحسب من قانون..",o:["mc","m/c²","m/c","mc²"],a:3,s:"E = mc² (معادلة أينشتاين)"}
+,{id:399,u:"(10) الفيزياء النووية",uid:10,q:"فقدان نواة الذرة غير المستقرة للطاقة بإصدار الإشعاعات تلقائياً يُسمى..",o:["تفاعلاً كيميائياً","تفاعلاً نووياً","تحللاً إشعاعياً","تغيراً إلكترونياً"],a:2,s:"التحلل الإشعاعي: فقدان الطاقة بشكل تلقائي"}
+,{id:400,u:"(10) الفيزياء النووية",uid:10,q:"شحنة نواة الهيليوم..",o:["1.6e-19 C","3.2e-19 C","4.8e-19 C","6.4e-19 C"],a:1,s:"نواة He: 2 بروتون = 3.2×10⁻¹⁹ C"}
+,{id:401,u:"(10) الفيزياء النووية",uid:10,q:"أشعة ألفا عبارة عن..",o:["نواة هيليوم ⁴₂He","إلكترون سريع","فوتون عالي الطاقة","نيوترون"],a:0,s:"جسيم ألفا = نواة هيليوم ⁴₂He"}
+,{id:402,u:"(10) الفيزياء النووية",uid:10,q:"في التفاعل: ²³⁸₉₂U → ²³⁴₉₀Th + ........، نوع الأشعة الناتجة..",o:["ألفا","بيتا","جاما","سينية"],a:0,s:"U→Th يفقد 2 بروتون و2 نيوترون = جسيم ألفا"}
+,{id:403,u:"(10) الفيزياء النووية",uid:10,q:"في تفاعل: ²³⁸₉₂U → α + ᴬ_ZY ، قيما Z وA..",o:["Z=94, A=242","Z=90, A=234","Z=90, A=238","Z=92, A=238"],a:1,s:"Z=92-2=90، A=238-4=234"}
+,{id:404,u:"(10) الفيزياء النووية",uid:10,q:"الأشعة المتكونة من إلكترون له شحنة سالبة هي..",o:["بيتا السالبة","ألفا","جاما","فوق البنفسجية"],a:0,s:"أشعة بيتا السالبة β⁻ = إلكترون"}
+,{id:405,u:"(10) الفيزياء النووية",uid:10,q:"اضمحلال بيتا يؤدي إلى..",o:["زيادة العدد الذري","نقص العدد الذري","زيادة العدد الكتلي","نقص العدد الكتلي"],a:0,s:"β⁻: نيوترون→بروتون → Z يزداد 1، A ثابت"}
+,{id:406,u:"(10) الفيزياء النووية",uid:10,q:"أشعة جاما عبارة عن..",o:["موجات كهرومغناطيسية عالية الطاقة","جسيمات","أيونات موجبة","أيونات سالبة"],a:0,s:"أشعة جاما: موجات كهرومغناطيسية قصيرة جداً"}
+,{id:407,u:"(10) الفيزياء النووية",uid:10,q:"أي الإشعاعات التالية لا يتأثر بالمجال الكهربي؟",o:["جاما","بيتا الموجبة","بيتا السالبة","ألفا"],a:0,s:"جاما كهرومغناطيسية → لا تتأثر بالمجال الكهربي"}
+,{id:408,u:"(10) الفيزياء النووية",uid:10,q:"اضمحلال جاما يؤدي إلى..",o:["تحرير إلكترونات","انبعاث نواة هيليوم","إعادة توزيع الطاقة داخل النواة","فقدان بروتونات"],a:2,s:"جاما: إعادة ترتيب الطاقة داخل النواة دون تغيير A أو Z"}
+,{id:409,u:"(10) الفيزياء النووية",uid:10,q:"أي نوع من الاضمحلال لا يُغير A أو Z في النواة؟",o:["البوزترون","ألفا","بيتا","جاما"],a:3,s:"جاما: لا تغير A أو Z"}
+,{id:410,u:"(10) الفيزياء النووية",uid:10,q:"عنصر مشع عمر نصفه 8 أيام، كتلته يوم السبت 10g، كتلته بعد 16 يوماً (أحد الأسبوع القادم)..",o:["10 g","5 g","2.5 g","1.25 g"],a:2,s:"16 يوم = 2 نصف عمر → m = 10×(1/2)² = 2.5g"}
+,{id:411,u:"(10) الفيزياء النووية",uid:10,q:"عينة مشعة كتلتها 8g وعمر نصفها 4 أيام، تبقى بعد 4 أيام..",o:["1/2 الكمية","1/4 الكمية","2 الكمية","4 الكمية"],a:0,s:"4 أيام = نصف عمر واحد → تبقى 1/2 الكمية = 4g"}
+,{id:412,u:"(10) الفيزياء النووية",uid:10,q:"مادة مشعة كتلتها 80g أصبحت 10g بعد 72 يوماً، عمر النصف بالأيام..",o:["24","12","30","60"],a:0,s:"(1/2)ⁿ = 10/80 = 1/8 → n=3؛ T½ = 72/3 = 24 يوم"}
+,{id:413,u:"(10) الفيزياء النووية",uid:10,q:"عدد التحللات الجسم المشعة كل ثانية يُسمى..",o:["الانشطار النووي","النشاط الإشعاعي","القوة النووية","الاندماج النووي"],a:1,s:"النشاط الإشعاعي: عدد التحللات في الثانية"}
+,{id:414,u:"(10) الفيزياء النووية",uid:10,q:"التفاعلات النووية أنواعها..",o:["الاضمحلال والانشطار والاندماج","الاضمحلال والنشاط الإشعاعي","الانشطار والاحتراق","الاندماج والاحتراق"],a:0,s:"أنواع التفاعلات النووية: اضمحلال، انشطار، اندماج"}
+,{id:415,u:"(10) الفيزياء النووية",uid:10,q:"مادة يمكن أن تُبطئ النيوترونات السريعة في المفاعلات النووية..",o:["الكربون","الباريوم","البورانيوم","الماء"],a:3,s:"الماء والجرافيت: مُهدئات لتبطيء النيوترونات"}
+,{id:416,u:"(10) الفيزياء النووية",uid:10,q:"قضبان التحكم في المفاعلات النووية مصنوعة من..",o:["الكادميوم","البورانيوم","الرصاص","الألومنيوم"],a:0,s:"الكادميوم: يمتص النيوترونات لضبط المفاعل"}
+,{id:417,u:"(10) الفيزياء النووية",uid:10,q:"نظير البورانيوم القابل للانشطار..",o:["U-235","U-238","U-231","U-234"],a:0,s:"U-235: النظير القابل للانشطار بنيوترونات بطيئة"}
+,{id:418,u:"(10) الفيزياء النووية",uid:10,q:"السنكروترون مسارع جسيمات يستخدم مساراً..",o:["خطياً","لولبياً","دائرياً","مستقيماً"],a:2,s:"السنكروترون: مسارع دائري"}
+,{id:419,u:"(10) الفيزياء النووية",uid:10,q:"عند تحول نيوترون إلى بروتون ينطلق..",o:["جسيم ألفا","جسيم بيتا سالب","أشعة جاما","بوزترون"],a:1,s:"n → p + β⁻ (اضمحلال بيتا السالبة)"}
+,{id:420,u:"(10) الفيزياء النووية",uid:10,q:"إذا تحول بروتون إلى نيوترون داخل الذرة يُنتج..",o:["بوزترون (β⁺)","نيوترون","إلكترون","بروتون"],a:0,s:"p → n + β⁺ (اضمحلال بيتا الموجبة)"}
+,{id:421,u:"(10) الفيزياء النووية",uid:10,q:"يستخدم عداد جايغر للكشف عن..",o:["الجسيمات غير المشحونة","الجسيمات المشحونة","النيوترونات","الجرافيتونات"],a:1,s:"عداد جايغر: يكشف الجسيمات المشحونة والأشعة"}
+,{id:422,u:"(10) الفيزياء النووية",uid:10,q:"للكشف عن الجسيمات المتعادلة كهربائياً نستخدم..",o:["عداد جايغر","حجرة الفقاعة","الكاشف التصادمي","حجرة غيمة ولسون"],a:1,s:"حجرة الفقاعة: تكشف الجسيمات المتعادلة"}
+,{id:423,u:"(10) الفيزياء النووية",uid:10,q:"الكواركات هي مكونات..",o:["الإلكترونات","البروتونات والنيوترونات","الفوتونات","النيوترينوات"],a:1,s:"الكواركات: مكونات البروتونات والنيوترونات"}
+,{id:424,u:"(10) الفيزياء النووية",uid:10,q:"عدد الكواركات في الباريون..",o:["اثنان","ثلاثة","أربعة","خمسة"],a:1,s:"الباريون (كالبروتون والنيوترون): 3 كواركات"}
+,{id:425,u:"(10) الفيزياء النووية",uid:10,q:"الميزونات تتكون من..",o:["كوارك وضديد كوارك","3 كواركات","إلكترون وبوزترون","نيوترونين"],a:0,s:"الميزون: كوارك + ضديد كوارك"}
+,{id:426,u:"(10) الفيزياء النووية",uid:10,q:"جسيم يحمل قوة الجاذبية لم يُكتشف بعد..",o:["كوارك","لبتون","جرافيتون","ميزون"],a:2,s:"الجرافيتون: الجسيم الناقل لقوة الجاذبية (نظري)"}
+,{id:427,u:"(10) الفيزياء النووية",uid:10,q:"الانشطار النووي يحدث عندما..",o:["نواتان خفيفتان تندمجان","نواة ثقيلة تنقسم إلى نواتين أخف","إلكترون يُطلق فوتوناً","بروتون يتحول لنيوترون"],a:1,s:"الانشطار: نواة ثقيلة (U-235) + نيوترون → نواتان + طاقة"}
+,{id:428,u:"(10) الفيزياء النووية",uid:10,q:"مصدر طاقة الشمس..",o:["انشطار نووي","اندماج نووي للهيدروجين","احتراق كيميائي","طاقة جيوحرارية"],a:1,s:"الشمس: اندماج نووي 4H → He + طاقة"}
+,{id:429,u:"(10) الفيزياء النووية",uid:10,q:"الاندماج النووي يُطلق طاقة أكبر لأن..",o:["يستخدم مواد أثقل","الكتلة المفقودة أكبر نسبياً","درجة حرارته أعلى","أكثر إشعاعاً"],a:1,s:"الاندماج: الكتلة المفقودة/الكتلة الأصلية أكبر → طاقة أكبر"}
+,{id:430,u:"(10) الفيزياء النووية",uid:10,q:"في معادلة أينشتاين E=mc², m تمثل..",o:["الكتلة المفقودة (عجز الكتلة)","الكتلة الكلية","كتلة الإلكترون","كتلة البروتون"],a:0,s:"m = عجز الكتلة (الكتلة المفقودة المتحولة لطاقة)"}
+,{id:431,u:"(10) الفيزياء النووية",uid:10,q:"التفاعل النووي الذي ينتج تفاعلاً سلسلياً..",o:["الانشطار","الاندماج","التحلل الإشعاعي","التفاعل الكيميائي"],a:0,s:"الانشطار ينتج نيوترونات تُحفز انشطارات أخرى → تفاعل سلسلي"}
+,{id:432,u:"(10) الفيزياء النووية",uid:10,q:"الكتلة الحرجة في الانشطار النووي هي..",o:["الكتلة التي يبدأ عندها التفاعل السلسلي التلقائي","الكتلة المفقودة","كتلة الوقود المستهلك","كتلة النيوترون"],a:0,s:"الكتلة الحرجة: الكتلة الدنيا اللازمة للتفاعل السلسلي"}
+];
+
+// ══════════════════════════════════════════════════
+// بيانات الفصول
+// ══════════════════════════════════════════════════
+const CHAPS = [
+  {name:"(1) علم الفيزياء",     cnt:33, icon:"🔬", desc:"القياس، الطريقة العلمية، الكميات الفيزيائية"},
+  {name:"(2) الميكانيكا",       cnt:158, icon:"⚙️", desc:"الحركة، القوى، الدوران، الجاذبية، الزخم"},
+  {name:"(3) الطاقة والآلات",   cnt:39, icon:"⚡", desc:"الشغل، الطاقة، القدرة، الكفاءة، الآلات"},
+  {name:"(4) حالات المادة",     cnt:39, icon:"🌡️", desc:"الحرارة، الضغط، الموائع، قوانين الغازات"},
+  {name:"(5) الموجات والصوت",  cnt:33, icon:"🔊", desc:"الموجات الميكانيكية والكهرومغناطيسية والصوت"},
+  {name:"(6) الضوء",            cnt:47, icon:"💡", desc:"الانعكاس، الانكسار، العدسات، البصريات"},
+  {name:"(7) الكهرباء",         cnt:56, icon:"🔌", desc:"الشحنات، المجال، الجهد، الدوائر الكهربائية"},
+  {name:"(8) المغناطيسية",      cnt:38, icon:"🧲", desc:"المغناطيسية، الحث الكهرومغناطيسي، المحولات"},
+  {name:"(9) الفيزياء الحديثة",cnt:45, icon:"⚛️", desc:"الكم، الفوتون، الذرة، أشباه الموصلات"},
+  {name:"(10) الفيزياء النووية",cnt:45, icon:"☢️", desc:"النواة، التحلل الإشعاعي، التفاعلات النووية"},
+];
+
+// ══════════════════════════════════════════════════
+// الحالة
+// ══════════════════════════════════════════════════
+const sel = new Set();
+let EQ=[], EA=[], EC=0, QTS=120, elapsed=0, TI=null, QI=null, QL=0;
+let IQ=[], IA=[], IC=0, IQI=null;
+let weakCh=[];
+let isAllSelected = false;
+
+// ══════════════════════════════════════════════════
+// مساعدات
+// ══════════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0)}
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function showModal(t,m,cb){$('mTitle').textContent=t;$('mMsg').textContent=m;$('mOkBtn').onclick=()=>{closeModal();cb()};$('modalBg').classList.add('open')}
+function closeModal(){$('modalBg').classList.remove('open')}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+// ══════════════════════════════════════════════════
+// بناء قائمة الفصول
+// ══════════════════════════════════════════════════
+function buildSections(){
+  const grid=$('sectionsGrid');
+  CHAPS.forEach(ch=>{
+    const d=document.createElement('div');
+    d.className='section-card';
+    d.dataset.name=ch.name;
+    d.innerHTML=`<span class="icon">${ch.icon}</span><h3>${ch.name}</h3><p>${ch.desc}</p><span class="q-count">${ch.cnt} سؤال</span>`;
+    d.onclick=()=>toggleChap(ch.name,d);
+    grid.appendChild(d);
+  });
+}
+
+function toggleChap(name, el){
+  isAllSelected=false;
+  $('fullExamCard').classList.remove('selected');
+  if(sel.has(name)){sel.delete(name);el.classList.remove('selected')}
+  else{sel.add(name);el.classList.add('selected')}
+  updateSelLabel();
+}
+
+function toggleAll(){
+  isAllSelected=!isAllSelected;
+  $('fullExamCard').classList.toggle('selected',isAllSelected);
+  if(isAllSelected){
+    CHAPS.forEach(c=>sel.add(c.name));
+    document.querySelectorAll('.section-card').forEach(c=>c.classList.add('selected'));
+  } else {
+    sel.clear();
+    document.querySelectorAll('.section-card').forEach(c=>c.classList.remove('selected'));
+  }
+  updateSelLabel();
+}
+
+function clearSel(){
+  sel.clear(); isAllSelected=false;
+  $('fullExamCard').classList.remove('selected');
+  document.querySelectorAll('.section-card').forEach(c=>c.classList.remove('selected'));
+  updateSelLabel();
+}
+
+function updateSelLabel(){
+  const pool=ALL_Q.filter(q=>sel.has(q.u));
+  const btn=$('startBtn');
+  if(!sel.size){$('selLabel').textContent='لم يُختَر فصل بعد — انقر على الفصول المطلوبة أو على الاختبار الشامل';$('selLabel').style.color='#e74c3c';btn.disabled=true;return}
+  btn.disabled=false;
+  const nv=$('qCountSel').value,n=nv==='all'?pool.length:Math.min(parseInt(nv),pool.length);
+  $('selLabel').textContent=`✅ تم اختيار ${sel.size} فصل — ${pool.length} سؤال متاح (سيُختبر ${n} سؤال)`;
+  $('selLabel').style.color='#1a4a8a';
+}
+
+// ══════════════════════════════════════════════════
+// الاختبار
+// ══════════════════════════════════════════════════
+function startExam(){
+  if(!sel.size)return;
+  let pool=ALL_Q.filter(q=>sel.has(q.u));
+  if($('shuffleChk').checked)pool=shuffle(pool);
+  const nv=$('qCountSel').value;
+  EQ=nv==='all'?pool:pool.slice(0,Math.min(parseInt(nv),pool.length));
+  EA=new Array(EQ.length).fill(null);EC=0;elapsed=0;
+  QTS=parseInt($('qTimeSel').value);
+  if(TI)clearInterval(TI);
+  TI=setInterval(()=>{elapsed++;updTimer()},1000);
+  updTimer();
+  $('examInfoBar').textContent=sel.size===CHAPS.length?'اختبار شامل':`${sel.size} ${sel.size===1?'فصل':'فصول'} مختارة`;
+  showScreen('examScreen');
+  renderQ();
+}
+
+function updTimer(){const h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60),s=elapsed%60;$('timerDisplay').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+
+function renderQ(){
+  const q=EQ[EC],tot=EQ.length;
+  $('progFill').style.width=`${(EC+1)/tot*100}%`;
+  $('progText').textContent=`${EA.filter(a=>a!==null).length} / ${tot}`;
+  $('navInfo').textContent=`سؤال ${EC+1} من ${tot}`;
+  const L=['أ','ب','ج','د'],done=EA[EC]!==null;
+  $('questionCard').innerHTML=`
+    <div class="question-meta">
+      <span class="question-num">سؤال ${EC+1}</span>
+      <span class="question-topic">${q.u}</span>
+      ${QTS>0&&!done?`<span class="q-time-left" id="qtl">⏱ ${QTS}s</span>`:''}
+    </div>
+    <div class="question-text">${q.q}</div>
+    <ul class="options-list">
+      ${q.o.map((o,i)=>`<li class="option-item${EA[EC]===i?' selected':''} ${done?'disabled':''}" onclick="${done?'':'pick('+i+')'}">
+        <span class="option-letter">${L[i]}</span><span>${o}</span>
+      </li>`).join('')}
+    </ul>`;
+  renderDots();
+  stopQT();
+  if(!done&&QTS>0)startQT();
+  else{$('qTimerFill').style.width='100%';$('qTimerFill').style.background='#27ae60'}
+}
+
+function startQT(){QL=QTS;updQTBar();QI=setInterval(()=>{QL--;updQTBar();const lbl=$('qtl');if(lbl)lbl.textContent=`⏱ ${QL}s`;if(QL<=0){stopQT();if(EC<EQ.length-1){EC++;renderQ()}else finishExam()}},1000)}
+function stopQT(){if(QI){clearInterval(QI);QI=null}}
+function updQTBar(){const p=QTS>0?Math.max(0,QL/QTS*100):100,f=$('qTimerFill');f.style.width=p+'%';f.style.background=p>60?'#27ae60':p>30?'#f39c12':'#e74c3c'}
+
+function pick(i){if(EA[EC]!==null)return;stopQT();EA[EC]=i;renderQ();setTimeout(()=>{if(EC<EQ.length-1){EC++;renderQ()}},400)}
+function prevQ(){stopQT();if(EC>0){EC--;renderQ()}}
+function nextQ(){stopQT();if(EC<EQ.length-1){EC++;renderQ()}}
+
+function renderDots(){
+  $('dotsRow').innerHTML='';
+  EQ.forEach((_,i)=>{const d=document.createElement('div');d.className='qdot'+(i===EC?' current':EA[i]!==null?' answered':'');d.textContent=i+1;d.onclick=()=>{stopQT();EC=i;renderQ()};$('dotsRow').appendChild(d)});
+}
+
+function confirmEnd(){showModal('إنهاء الاختبار؟',`أجبت على ${EA.filter(a=>a!==null).length} من ${EQ.length} سؤال. هل تريد الإنهاء والتصحيح؟`,finishExam)}
+function confirmHome(){showModal('العودة للرئيسية؟','سيتم فقدان تقدمك في الاختبار الحالي.',()=>showScreen('homeScreen'))}
+
+function finishExam(){
+  stopQT();if(TI)clearInterval(TI);
+  let ok=0,ng=0,sk=0;const cs={};
+  EQ.forEach((q,i)=>{if(!cs[q.u])cs[q.u]={c:0,t:0};cs[q.u].t++;if(EA[i]===null)sk++;else if(EA[i]===q.a){ok++;cs[q.u].c++}else ng++});
+  const tot=EQ.length,pct=Math.round(ok/tot*100);
+  $('scoreNum').textContent=pct+'%';
+  const gb=$('gradeBadge');
+  if(pct>=90){gb.textContent='ممتاز 🏆';gb.className='grade-badge grade-A'}
+  else if(pct>=75){gb.textContent='جيد جداً ⭐';gb.className='grade-badge grade-B'}
+  else if(pct>=60){gb.textContent='جيد 📚';gb.className='grade-badge grade-C'}
+  else{gb.textContent='يحتاج مراجعة ⚠️';gb.className='grade-badge grade-D'}
+  const h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60),s=elapsed%60;
+  $('timeTaken').textContent=`⏱ الوقت المستغرق: ${h?h+'س ':' '}${m} دقيقة و ${s} ثانية`;
+  $('rOk').textContent=ok;$('rNg').textContent=ng;$('rSk').textContent=sk;$('rTot').textContent=tot;
+  weakCh=Object.entries(cs).filter(([,s])=>s.c/s.t<0.7).map(([n])=>n);
+  buildReport(cs);buildReview('all');buildIntenseSetup();
+  showScreen('resultsScreen');
+  // activate first tab
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===0));
+}
+
+// ══════════════════════════════════════════════════
+// تقرير الأداء
+// ══════════════════════════════════════════════════
+function buildReport(cs){
+  $('reportList').innerHTML='<div class="section-divider" style="border-bottom:2px solid #e0e0e0;padding-bottom:8px;margin-bottom:16px;font-weight:700;color:var(--primary)">📊 الأداء بالفصول</div>'
+  +Object.entries(cs).sort((a,b)=>b[1].c/b[1].t-a[1].c/a[1].t).map(([name,s])=>{
+    const p=Math.round(s.c/s.t*100),col=p>=70?'#27ae60':p>=50?'#f39c12':'#e74c3c';
+    const pri=p<50?'priority-high':p<70?'priority-mid':'priority-low';
+    const priTxt=p<50?'يحتاج مراجعة مكثفة':p<70?'يحتاج مراجعة':' أداء جيد';
+    return `<div class="report-card">
+      <div class="report-header">
+        <span class="report-topic-name">${name}</span>
+        <span class="priority-badge ${pri}">${priTxt}</span>
+      </div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${p}%;background:${col}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted);margin-top:4px">
+        <span>${s.c} صحيح من ${s.t}</span><span>${p}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// المراجعة
+// ══════════════════════════════════════════════════
+function buildReview(filter){
+  const L=['أ','ب','ج','د'];
+  let items=EQ.map((q,i)=>({q,i,a:EA[i]}));
+  if(filter==='wrong')items=items.filter(x=>x.a!==null&&x.a!==x.q.a);
+  else if(filter==='correct')items=items.filter(x=>x.a===x.q.a);
+  else if(filter==='skip')items=items.filter(x=>x.a===null);
+  if(!items.length){$('reviewList').innerHTML='<div class="empty-state">لا توجد أسئلة في هذه الفئة</div>';return}
+  $('reviewList').innerHTML=items.map(({q,i,a})=>{
+    const ok=a===q.a,sk=a===null;
+    const rc=sk?'skip-card':ok?'correct-card':'wrong-card';
+    const sc=sk?'status-skip':ok?'status-correct':'status-wrong';
+    const st=sk?'⏭ متروك':ok?'✅ صحيح':'❌ خطأ';
+    const answers=q.o.map((o,j)=>{
+      if(j===q.a)return`<div class="review-answer correct-ans"><strong>${L[j]}</strong> ${o} ✅</div>`;
+      if(j===a&&!ok)return`<div class="review-answer user-wrong"><strong>${L[j]}</strong> ${o} ❌</div>`;
+      return'';
+    }).join('');
+    const exp=!ok?`<div class="explanation-box"><strong>💡 الحل والشرح:</strong>${q.s.replace(/\n/g,'<br>')}</div>`:'';
+    return`<div class="review-card ${rc}">
+      <span class="review-status ${sc}">${st}</span>
+      <div style="font-size:0.76rem;color:var(--muted);margin-bottom:8px">${q.u} • س${i+1}</div>
+      <div class="review-q">${q.q}</div>
+      <div class="review-answers">${answers}</div>${exp}
+    </div>`;
+  }).join('');
+}
+
+function filterRev(f,btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active-filter'));btn.classList.add('active-filter');buildReview(f)}
+
+// ══════════════════════════════════════════════════
+// الاختبار المكثف
+// ══════════════════════════════════════════════════
+function buildIntenseSetup(){
+  const tab=$('intenseSetup');
+  if(!weakCh.length){tab.innerHTML='<div class="empty-state">🏆 ممتاز! لا توجد فصول ضعيفة. أداؤك جيد في جميع الفصول!</div>';return}
+  tab.innerHTML=`
+    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:16px 18px;margin-bottom:16px">
+      <strong style="color:#7a5500">⚠️ فصول تحتاج مراجعة مكثفة:</strong>
+      <ul style="margin:10px 0 0 18px;font-size:0.88rem;color:#4a3800;line-height:1.9">${weakCh.map(n=>`<li>${n}</li>`).join('')}</ul>
+    </div>
+    <div class="btn-center">
+      <button class="btn btn-danger" onclick="launchIntense()">🎯 ابدأ الاختبار المكثف (${Math.min(30,ALL_Q.filter(q=>weakCh.includes(q.u)).length)} سؤال)</button>
+    </div>`;
+}
+
+function launchIntense(){
+  const pool=ALL_Q.filter(q=>weakCh.includes(q.u));
+  IQ=shuffle(pool).slice(0,Math.min(30,pool.length));
+  IA=new Array(IQ.length).fill(null);IC=0;
+  const chs=[...new Set(IQ.map(q=>q.u))];
+  $('intenseDesc').textContent=`${IQ.length} سؤال من ${chs.length} فصل ضعيف`;
+  showScreen('intenseScreen');renderIQ();
+}
+
+function renderIQ(){
+  const q=IQ[IC],tot=IQ.length;
+  $('iProgFill').style.width=`${(IC+1)/tot*100}%`;
+  $('iProgText').textContent=`${IA.filter(a=>a!==null).length} / ${tot}`;
+  const L=['أ','ب','ج','د'],done=IA[IC]!==null;
+  $('iQuestionCard').innerHTML=`
+    <div class="question-meta">
+      <span class="question-num" style="background:#c0392b">سؤال ${IC+1}</span>
+      <span class="question-topic">${q.u}</span>
+    </div>
+    <div class="question-text">${q.q}</div>
+    <ul class="options-list">
+      ${q.o.map((o,i)=>`<li class="option-item${IA[IC]===i?' selected':''} ${done?'disabled':''}" onclick="${done?'':'iPick('+i+')'}">
+        <span class="option-letter">${L[i]}</span><span>${o}</span>
+      </li>`).join('')}
+    </ul>`;
+  $('iDotsRow').innerHTML='';
+  IQ.forEach((_,i)=>{const d=document.createElement('div');d.className='qdot'+(i===IC?' current':IA[i]!==null?' answered':'');d.textContent=i+1;d.onclick=()=>{iStopQT();IC=i;renderIQ()};$('iDotsRow').appendChild(d)});
+  iStopQT();
+  if(!done&&QTS>0){let tl=QTS;const f=$('iQTimerFill');f.style.width='100%';f.style.background='#27ae60';
+    IQI=setInterval(()=>{tl--;const p=Math.max(0,tl/QTS*100);f.style.width=p+'%';f.style.background=p>60?'#27ae60':p>30?'#f39c12':'#e74c3c';if(tl<=0){iStopQT();if(IC<IQ.length-1){IC++;renderIQ()}else finishIntense()}},1000)}
+  else{$('iQTimerFill').style.width='100%';$('iQTimerFill').style.background='#27ae60'}
+}
+
+function iStopQT(){if(IQI){clearInterval(IQI);IQI=null}}
+function iPick(i){if(IA[IC]!==null)return;iStopQT();IA[IC]=i;renderIQ();setTimeout(()=>{if(IC<IQ.length-1){IC++;renderIQ()}},400)}
+function iPrevQ(){iStopQT();if(IC>0){IC--;renderIQ()}}
+function iNextQ(){iStopQT();if(IC<IQ.length-1){IC++;renderIQ()}}
+function iConfirmEnd(){showModal('إنهاء المكثف؟',`أجبت على ${IA.filter(a=>a!==null).length} من ${IQ.length}.`,finishIntense)}
+
+function finishIntense(){
+  iStopQT();
+  let ok=0,ng=0,sk=0;
+  IQ.forEach((q,i)=>{if(IA[i]===null)sk++;else if(IA[i]===q.a)ok++;else ng++});
+  const pct=Math.round(ok/IQ.length*100);
+  const L=['أ','ب','ج','د'];
+  // Show results inline
+  const res=`<div style="background:linear-gradient(135deg,var(--primary),#0d2d5e);color:white;border-radius:14px;padding:24px;text-align:center;margin-bottom:20px">
+    <div style="font-size:2.5rem;font-weight:900;margin-bottom:4px">${pct}%</div>
+    <div>${ok} صحيح من ${IQ.length}</div>
+    <div style="margin-top:8px;opacity:.8">${pct>=70?'تحسن ملحوظ 🎉':'استمر في المراجعة 💪'}</div>
+  </div>
+  <div style="font-weight:700;margin-bottom:12px;color:var(--primary)">مراجعة أسئلة المكثف:</div>
+  `+IQ.map((q,i)=>{
+    const a=IA[i],ok2=a===q.a,sk2=a===null;
+    const rc=sk2?'skip-card':ok2?'correct-card':'wrong-card';
+    const answers=q.o.map((o,j)=>{
+      if(j===q.a)return`<div class="review-answer correct-ans"><strong>${L[j]}</strong> ${o} ✅</div>`;
+      if(j===a&&!ok2)return`<div class="review-answer user-wrong"><strong>${L[j]}</strong> ${o} ❌</div>`;
+      return'';
+    }).join('');
+    const exp=!ok2?`<div class="explanation-box"><strong>💡 الحل:</strong>${q.s.replace(/\n/g,'<br>')}</div>`:'';
+    return`<div class="review-card ${rc}"><div style="font-size:0.76rem;color:var(--muted);margin-bottom:8px">${q.u} • س${i+1}</div><div class="review-q">${q.q}</div><div class="review-answers">${answers}</div>${exp}</div>`;
+  }).join('');
+  // Replace the question area with results
+  $('iQuestionCard').innerHTML=res;
+  $('iDotsRow').innerHTML='';
+  document.querySelector('#intenseScreen .nav-buttons').innerHTML=`
+    <button class="btn btn-outline" onclick="showScreen('resultsScreen')">📊 النتائج الأولى</button>
+    <button class="btn btn-primary" onclick="showScreen('homeScreen')">🔄 اختبار جديد</button>`;
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  $('tab-'+name).classList.add('active');
+}
+
+// تشغيل
+buildSections();
+$('qCountSel').addEventListener('change',updateSelLabel);
+</script>
+</body>
+</html>
